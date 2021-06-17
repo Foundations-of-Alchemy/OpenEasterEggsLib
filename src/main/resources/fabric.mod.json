@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "recipe_obf",
+  "version": "${version}",
+  "authors": [
+    "HalfOf2"
+  ],
+  "license": "MPL-2.0",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.devtech.recipe_obf.RecipeObfuscator"
+    ]
+  },
+  "mixins": [
+    "recipe_obf.mixins.json"
+  ]
+}
