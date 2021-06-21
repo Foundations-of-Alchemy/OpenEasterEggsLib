@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
-  "id": "recipe_obf",
+  "id": "oeel",
+  "name": "OpenEasterEggLib",
   "version": "${version}",
   "authors": [
     "HalfOf2"
@@ -9,10 +10,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.devtech.recipe_obf.RecipeObfuscator"
+      "net.devtech.oeel.v0.api.OEEL"
     ]
   },
   "mixins": [
-    "recipe_obf.mixins.json"
+    "oeel.mixins.json"
   ]
 }
