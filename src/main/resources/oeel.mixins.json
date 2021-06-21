@@ -1,9 +1,10 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "net.devtech.oeel.mixin",
+  "package": "net.devtech.oeel.impl.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "ServerResourceManagerMixin_Event"
   ],
   "client": [
   ],
