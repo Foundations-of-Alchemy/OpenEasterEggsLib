@@ -50,16 +50,7 @@ public class ObfuscatedShapelessCraftingRecipe extends AbstractObfuscatedShapedC
 				return STACK;
 			}
 
-			ItemStack output = this.decrypt(decryption.hash());
-			for(int i = 0; i < inventory.size(); i++) {
-				ItemStack stack = inventory.getStack(i);
-				if(!stack.isEmpty()) {
-					ItemStack copy = stack.copy();
-					copy.decrement(1);
-					inventory.setStack(i, copy);
-				}
-			}
-			return output;
+			return this.decrypt(decryption.hash());
 		}
 		return ItemStack.EMPTY;
 	}

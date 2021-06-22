@@ -85,7 +85,7 @@ public abstract class AbstractObfuscatedShapedCraftingRecipe extends SpecialCraf
 			String output = Validate.notNull(json.getAsJsonPrimitive("output"), "No output item!").getAsString();
 			byte[] outputBytes = OEELInternal.decodeBase16(output);
 
-			return this.read(json, id, inputHashCode, substCfgId, outputBytes, Hashing.sha256());
+			return this.read(json, id, inputHashCode, substCfgId, outputBytes, OEELInternal.FUNCTION);
 		}
 
 
@@ -104,7 +104,7 @@ public abstract class AbstractObfuscatedShapedCraftingRecipe extends SpecialCraf
 			byte[] hash = buf.readByteArray();
 			Identifier substCfg = buf.readBoolean() ? buf.readIdentifier() : null;
 			byte[] output = buf.readByteArray();
-			return this.read(buf, id, HashCode.fromBytes(hash), substCfg, output, Hashing.sha256());
+			return this.read(buf, id, HashCode.fromBytes(hash), substCfg, output, OEELInternal.FUNCTION);
 		}
 
 		@Override

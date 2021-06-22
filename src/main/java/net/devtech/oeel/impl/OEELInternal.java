@@ -181,9 +181,8 @@ public class OEELInternal {
 	public static final String ALGORITHM = "AES";
 
 	public static ItemStack decryptItem(HashCode key, byte[] data) throws GeneralSecurityException, IOException {
-		byte[] keyBytes = new byte[128];
+		byte[] keyBytes = new byte[16];
 		key.writeBytesTo(keyBytes, 0, keyBytes.length);
-
 		byte[] itemBytes = crypt(keyBytes, data, Cipher.DECRYPT_MODE);
 		ByteArrayInputStream bis = new ByteArrayInputStream(itemBytes);
 		DataInputStream dis = new DataInputStream(bis);
@@ -197,7 +196,7 @@ public class OEELInternal {
 			NbtIo.write(stack.writeNbt(new NbtCompound()), dos);
 			dos.flush();
 			byte[] itemBytes = bos.toByteArray();
-			byte[] keyBytes = new byte[128];
+			byte[] keyBytes = new byte[16];
 			key.writeBytesTo(keyBytes, 0, keyBytes.length);
 			return crypt(keyBytes, itemBytes, Cipher.ENCRYPT_MODE);
 		} catch(Throwable t) {

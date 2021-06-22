@@ -65,7 +65,7 @@ public final class ObfuscatedShapedCraftingRecipe extends AbstractObfuscatedShap
 		decryption.putUnencodedChars("decrypted output");
 		for(int x = 0; x < this.width; x++) {
 			for(int y = 0; y < this.height; y++) {
-				ItemKey key = ItemKey.of(inventory.getStack(offX + x + (offY + y) * inventory.getWidth()));
+				ItemKey key = ItemKey.of(inventory.getStack((offX + x) + (offY + y) * inventory.getWidth()));
 				this.hasher.hash(key, validation);
 				this.hasher.hash(key, decryption);
 			}
@@ -75,19 +75,7 @@ public final class ObfuscatedShapedCraftingRecipe extends AbstractObfuscatedShap
 				return STACK;
 			}
 
-			ItemStack stack = this.decrypt(decryption.hash());
-			for(int x = 0; x < this.width; x++) {
-				for(int y = 0; y < this.height; y++) {
-					int s = offX + x + (offY + y) * inventory.getWidth();
-					ItemStack at = inventory.getStack(s).copy();
-					if(!at.isEmpty()) {
-						at.decrement(1);
-					}
-					inventory.setStack(s, at);
-				}
-			}
-
-			return stack;
+			return this.decrypt(decryption.hash());
 		} else {
 			return ItemStack.EMPTY;
 		}
