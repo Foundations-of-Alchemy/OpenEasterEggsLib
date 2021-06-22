@@ -11,6 +11,7 @@ import com.google.gson.JsonObject;
 import io.github.astrarre.itemview.v0.fabric.ItemKey;
 import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.impl.AbstractRecipeSerializer;
+import net.devtech.oeel.impl.OEELInternal;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.inventory.CraftingInventory;
@@ -49,8 +50,8 @@ public final class ObfuscatedShapedCraftingRecipe extends AbstractObfuscatedShap
 
 	@Override
 	public ItemStack craft(CraftingInventory inventory, boolean dryRun) throws GeneralSecurityException, IOException {
-		for(int offX = 0; offX < inventory.getWidth() - this.width; offX++) {
-			for(int offY = 0; offY < inventory.getHeight() - this.height; offY++) {
+		for(int offX = 0; offX <= inventory.getWidth() - this.width; offX++) {
+			for(int offY = 0; offY <= inventory.getHeight() - this.height; offY++) {
 				ItemStack craft = this.craft(inventory, offX, offY, dryRun);
 				if(!craft.isEmpty()) {
 					return craft;
@@ -65,11 +66,16 @@ public final class ObfuscatedShapedCraftingRecipe extends AbstractObfuscatedShap
 		decryption.putUnencodedChars("decrypted output");
 		for(int x = 0; x < this.width; x++) {
 			for(int y = 0; y < this.height; y++) {
-				ItemKey key = ItemKey.of(inventory.getStack((offX + x) + (offY + y) * inventory.getWidth()));
-				this.hasher.hash(key, validation);
-				this.hasher.hash(key, decryption);
+				ItemStack stack = inventory.getStack((offX + x) + (offY + y) * inventory.getWidth());
+				String str = OEELInternal.hash(stack, this.function).toString();
+				if(this.substitution != null) {
+					str = this.substitution.substitute(str, ItemKey.of(stack));
+				}
+				validation.putUnencodedChars(str);
+				decryption.putUnencodedChars(str);
 			}
 		}
+
 		if(validation.hash().equals(this.hash)) {
 			if(dryRun) {
 				return STACK;

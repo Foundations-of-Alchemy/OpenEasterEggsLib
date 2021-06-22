@@ -1,30 +1,21 @@
 package net.devtech.oeel.impl.shaped;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.Key;
-
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
 
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.impl.AbstractRecipeSerializer;
 import net.devtech.oeel.impl.OEELInternal;
-import net.devtech.oeel.v0.api.access.ItemHasher;
+import net.devtech.oeel.impl.resource.ItemHashSubstitutionManager;
+import net.devtech.oeel.v0.api.access.ItemHashSubstitution;
 
 import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.util.Identifier;
@@ -35,7 +26,7 @@ public abstract class AbstractObfuscatedShapedCraftingRecipe extends SpecialCraf
 	protected static final ItemStack STACK = new ItemStack(Items.STONE);
 	final HashCode hash;
 	final Identifier substitutionConfig;
-	final ItemHasher hasher;
+	final ItemHashSubstitution substitution;
 	final byte[] output;
 	final HashFunction function;
 
@@ -45,7 +36,7 @@ public abstract class AbstractObfuscatedShapedCraftingRecipe extends SpecialCraf
 		this.substitutionConfig = config;
 		this.output = output;
 		this.function = function;
-		this.hasher = OEELInternal.from(substitutionConfig);
+		this.substitution = Validate.transform(this.substitutionConfig, ItemHashSubstitutionManager::forId);
 	}
 
 	@Override

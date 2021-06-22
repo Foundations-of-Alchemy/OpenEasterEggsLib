@@ -18,9 +18,6 @@ import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import io.github.astrarre.util.v0.api.Id;
 import io.github.astrarre.util.v0.api.Validate;
-import net.devtech.oeel.impl.resource.ItemHashSubstitutionManager;
-import net.devtech.oeel.v0.api.access.ItemHashSubstitution;
-import net.devtech.oeel.v0.api.access.ItemHasher;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.item.ItemStack;
@@ -166,17 +163,6 @@ public class OEELInternal {
 		return new String(hexChars, StandardCharsets.UTF_8);
 	}
 
-	public static ItemHasher from(@Nullable Identifier substitutionConfig) {
-		ItemHashSubstitution substCfg = Validate.transform(substitutionConfig, ItemHashSubstitutionManager::forId);
-		if(substCfg == null) {
-			return (s, h) -> h.putUnencodedChars(OEELInternal.hash(s.createItemStack(1), FUNCTION).toString());
-		} else {
-			return (s, h) -> {
-				String init = hash(s.createItemStack(1), FUNCTION).toString();
-				h.putUnencodedChars(substCfg.substitute(init, s));
-			};
-		}
-	}
 
 	public static final String ALGORITHM = "AES";
 

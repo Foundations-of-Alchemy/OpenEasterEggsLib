@@ -1,0 +1,10 @@
+{
+  "type": "oeel:obf_shaped",
+  "input": "2c3558fa59c7c5700cac1c004267843233d000f40031ae71a697a5773df22be3",
+  "substitutionConfig": "oeel:standard",
+  "output": "212EB861802C09CF01550B25B2E58E166752BB5E45AEC8A672D65AB6ED17201751DE9151A9C98B07C56ABF11CE763101",
+  "dimensions": [
+    3,
+    2
+  ]
+}

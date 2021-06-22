@@ -38,7 +38,10 @@ public abstract class MultiJsonDataLoader extends SinglePreparationResourceReloa
 				for(Resource rss : manager.getAllResources(resource)) {
 					try(BufferedReader reader = new BufferedReader(new InputStreamReader(rss.getInputStream()))) {
 						JsonElement element = JsonHelper.deserialize(this.gson, reader, JsonElement.class);
-						map.put(rss.getId(), element);
+						Identifier id = rss.getId();
+						String path = id.getPath();
+						int index = path.indexOf('/'), endIndex = path.lastIndexOf(".json");
+						map.put(new Identifier(id.getNamespace(), path.substring(index+1, endIndex)), element);
 					}
 				}
 			} catch(IOException e) {

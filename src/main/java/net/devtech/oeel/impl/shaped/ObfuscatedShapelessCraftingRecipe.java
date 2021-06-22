@@ -12,6 +12,7 @@ import com.google.common.hash.Hasher;
 import com.google.gson.JsonObject;
 import io.github.astrarre.itemview.v0.fabric.ItemKey;
 import net.devtech.oeel.impl.AbstractRecipeSerializer;
+import net.devtech.oeel.impl.OEELInternal;
 
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
@@ -28,21 +29,25 @@ public class ObfuscatedShapelessCraftingRecipe extends AbstractObfuscatedShapedC
 
 	@Override
 	public ItemStack craft(CraftingInventory inventory, boolean dryRun) throws GeneralSecurityException, IOException {
-		List<ItemKey> items = new ArrayList<>();
+		List<String> items = new ArrayList<>();
 		for(int i = 0; i < inventory.size(); i++) {
 			ItemStack stack = inventory.getStack(i);
 			if(!stack.isEmpty()) {
-				items.add(ItemKey.of(stack));
+				String str = OEELInternal.hash(stack, this.function).toString();
+				if(this.substitution != null) {
+					str = this.substitution.substitute(str, ItemKey.of(stack));
+				}
+				items.add(str);
 			}
 		}
 
-		items.sort(Comparator.comparing(ItemKey::toString));
+		items.sort(Comparator.naturalOrder());
 
 		Hasher validation = this.function.newHasher(), decryption = this.function.newHasher();
 		decryption.putUnencodedChars("decrypted output");
-		for(ItemKey item : items) {
-			this.hasher.hash(item, validation);
-			this.hasher.hash(item, decryption);
+		for(String item : items) {
+			validation.putUnencodedChars(item);
+			decryption.putUnencodedChars(item);
 		}
 
 		if(this.hash.equals(validation.hash())) {

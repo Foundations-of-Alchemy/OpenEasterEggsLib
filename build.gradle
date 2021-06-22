@@ -1,56 +1,73 @@
 plugins {
     id 'fabric-loom' version '0.9-SNAPSHOT'
     id 'maven-publish'
+    id 'java-library'
 }
-
-archivesBaseName = project.archives_base_name
-version = project.mod_version
-group = project.maven_group
 
 repositories {
     maven {
         url 'https://storage.googleapis.com/devan-maven/'
+        content {
+            includeGroup "io.github.astrarre"
+        }
     }
 }
 
 dependencies {
-    //to change the versions see the gradle.properties file
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation 'io.github.astrarre:astrarre-access-v0-fabric:1.6.3'
+    modImplementation 'TechReborn:TechReborn-1.17:5.0.2-beta+build.43'
+    modImplementation 'RebornCore:RebornCore-1.17:5.0.2-beta+build.43'
 }
 
-processResources {
-    inputs.property "version", project.version
+subprojects {
+    apply plugin: 'maven-publish'
+    apply plugin: 'fabric-loom'
+    apply plugin: 'java-library'
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = "sources"
-    from sourceSets.main.allSource
-}
+allprojects {
+    archivesBaseName = project.archives_base_name
+    version = project.mod_version
+    group = project.maven_group
 
-jar {
-    from "LICENSE"
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            // add all the jars that should be included when publishing to maven
-            artifact(remapJar) {
-                builtBy remapJar
-            }
-            artifact(sourcesJar) {
-                builtBy remapSourcesJar
-            }
-        }
+    dependencies {
+        //to change the versions see the gradle.properties file
+        minecraft "com.mojang:minecraft:${project.minecraft_version}"
+        mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+        modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+        modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     }
 
-    // select the repositories you want to publish to
-    repositories {
-        // uncomment to publish to the local maven
-        // mavenLocal()
+    processResources {
+        inputs.property "version", project.version
+    }
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = "sources"
+        from sourceSets.main.allSource
+    }
+
+    jar {
+        from "$rootProject.projectDir/LICENSE"
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                // add all the jars that should be included when publishing to maven
+                artifact(remapJar) {
+                    builtBy remapJar
+                }
+                artifact(sourcesJar) {
+                    builtBy remapSourcesJar
+                }
+            }
+        }
+
+        // select the repositories you want to publish to
+        repositories {
+            // uncomment to publish to the local maven
+            // mavenLocal()
+        }
     }
 }

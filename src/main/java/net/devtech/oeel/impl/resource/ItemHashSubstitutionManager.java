@@ -33,10 +33,6 @@ public class ItemHashSubstitutionManager extends MultiJsonDataLoader {
 		super(GSON, "item_subst");
 	}
 
-	public static ItemHashSubstitution forId(Identifier id) {
-		return HASH_FUNCTIONS.computeIfAbsent(id, ItemHasherRef::new);
-	}
-
 	@Override
 	protected void apply(Multimap<Identifier, JsonElement> prepared, ResourceManager manager, Profiler profiler) {
 		HASH_FUNCTIONS.clear();
@@ -47,7 +43,7 @@ public class ItemHashSubstitutionManager extends MultiJsonDataLoader {
 			ArrayList<ItemHashSubstitution> hashers = new ArrayList<>();
 			for(JsonElement element : elements) {
 				JsonObject o = element.getAsJsonObject();
-				if(o.getAsJsonPrimitive("replace").getAsBoolean()) {
+				if(o.has("replace") && o.getAsJsonPrimitive("replace").getAsBoolean()) {
 					hashers.clear();
 				}
 				hashers.ensureCapacity(hashers.size() + o.size());
@@ -67,7 +63,9 @@ public class ItemHashSubstitutionManager extends MultiJsonDataLoader {
 			String replacement = entry.getValue().getAsString();
 			if(key.startsWith("#")) {
 				TagManager manager = ServerTagManagerHolder.getTagManager();
-				Tag<Item> tag = manager.getTag(Registry.ITEM_KEY, Id.create(key.substring(1)).to(), (i) -> new JsonSyntaxException("Unknown item tag '" + i + "'"));
+				Tag<Item> tag = manager.getTag(Registry.ITEM_KEY,
+				                               Id.create(key.substring(1)).to(),
+				                               (i) -> new JsonSyntaxException("Unknown item tag '" + i + "'"));
 				hashers.add((i, k) -> {
 					if(tag.contains(k.getItem())) {
 						return replacement;
@@ -98,6 +96,10 @@ public class ItemHashSubstitutionManager extends MultiJsonDataLoader {
 		}
 	}
 
+	public static ItemHashSubstitution forId(Identifier id) {
+		return HASH_FUNCTIONS.computeIfAbsent(id, ItemHasherRef::new);
+	}
+
 	private static class ItemHasherRef implements ItemHashSubstitution {
 		private final Identifier id;
 		private ItemHashSubstitution hasher;
@@ -110,7 +112,11 @@ public class ItemHashSubstitutionManager extends MultiJsonDataLoader {
 		public String substitute(String incoming, ItemKey val) {
 			ItemHashSubstitution hash = this.hasher;
 			if(hash == null) {
-				this.hasher = hash = Validate.notNull(HASH_FUNCTIONS.get(this.id), "no item hash substitute found for id " + this.id);
+				ItemHashSubstitution substitution = HASH_FUNCTIONS.get(this.id);
+				if(substitution == this) {
+					substitution = null;
+				}
+				this.hasher = hash = Validate.notNull(substitution, "no item hash substitute found for id " + this.id);
 			}
 			return hash.substitute(incoming, val);
 		}
