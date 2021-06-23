@@ -6,8 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Multimap;
-import com.google.gson.Gson;
+import com.google.common.collect.ListMultimap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -15,27 +14,25 @@ import io.github.astrarre.itemview.v0.fabric.ItemKey;
 import io.github.astrarre.util.v0.api.Id;
 import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.v0.api.access.ItemHashSubstitution;
+import net.devtech.oeel.v0.api.data.MultiJsonDataLoader;
 
 import net.minecraft.item.Item;
-import net.minecraft.resource.ResourceManager;
 import net.minecraft.tag.ServerTagManagerHolder;
 import net.minecraft.tag.Tag;
 import net.minecraft.tag.TagManager;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.Registry;
 
-public class ItemHashSubstitutionManager extends MultiJsonDataLoader {
+public class ItemHashSubstitutionManager extends MultiJsonDataLoader<JsonElement> {
 	private static final Map<Identifier, ItemHashSubstitution> HASH_FUNCTIONS = new HashMap<>();
-	private static final Gson GSON = new Gson();
-
 	public ItemHashSubstitutionManager() {
-		super(GSON, "item_subst");
+		super("item_subst", JsonElement.class);
 	}
 
 	@Override
-	protected void apply(Multimap<Identifier, JsonElement> prepared, ResourceManager manager, Profiler profiler) {
+	protected void apply(ListMultimap<Identifier, JsonElement> prepared) {
 		HASH_FUNCTIONS.clear();
+
 		for(Map.Entry<Identifier, Collection<JsonElement>> entry : prepared.asMap().entrySet()) {
 			Identifier identifier = entry.getKey();
 			Collection<JsonElement> elements = entry.getValue();
@@ -97,6 +94,7 @@ public class ItemHashSubstitutionManager extends MultiJsonDataLoader {
 	}
 
 	public static ItemHashSubstitution forId(Identifier id) {
+		if(id == null) return null;
 		return HASH_FUNCTIONS.computeIfAbsent(id, ItemHasherRef::new);
 	}
 

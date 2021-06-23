@@ -11,12 +11,19 @@ repositories {
             includeGroup "io.github.astrarre"
         }
     }
+    maven {
+        url 'https://www.cursemaven.com/'
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }
 
 dependencies {
     modImplementation 'io.github.astrarre:astrarre-access-v0-fabric:1.6.3'
     modImplementation 'TechReborn:TechReborn-1.17:5.0.2-beta+build.43'
     modImplementation 'RebornCore:RebornCore-1.17:5.0.2-beta+build.43'
+    modImplementation(include('curse.maven:fwf-364531:3005190'))
 }
 
 subprojects {

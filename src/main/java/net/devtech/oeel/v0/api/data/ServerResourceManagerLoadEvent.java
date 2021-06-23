@@ -1,6 +1,7 @@
-package net.devtech.oeel.impl;
+package net.devtech.oeel.v0.api.data;
 
 import io.github.astrarre.access.v0.api.Access;
+import net.devtech.oeel.impl.OEELInternal;
 
 import net.minecraft.resource.ReloadableResourceManager;
 import net.minecraft.resource.ServerResourceManager;
