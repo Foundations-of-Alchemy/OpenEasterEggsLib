@@ -147,6 +147,6 @@ public class OEELMatrixCrafting {
 			}
 		}
 
-		return new EncryptionEntry(validation.hash(), decryption.hash());
+		return new EncryptionEntry(validation.hash(), testingForEmpty ? null : decryption.hash());
 	}
 }

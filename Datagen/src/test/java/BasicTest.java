@@ -14,7 +14,7 @@ public class BasicTest {
 		System.out.println(ItemRecipeBuilder.itemOutput(Items.STONE).item(Items.IRON_AXE).item(Items.ITEM_FRAME).shaped(1, 2));
 		System.out.println(ItemRecipeBuilder.itemOutput(Items.BUCKET)
 				                   .direct("tin_ingot").item(Items.AIR).direct("tin_ingot")
-				                   .item(Items.AIR).direct("tin_ingot_replacement").item(Items.AIR)
+				                   .item(Items.AIR).direct("tin_ingot").item(Items.AIR)
 				                   .substCfg("oeel", "standard").shaped(3, 2));
 	}
 }
