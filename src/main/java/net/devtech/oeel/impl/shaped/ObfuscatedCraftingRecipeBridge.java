@@ -80,7 +80,6 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 					}
 				}
 			}
-			System.out.println("unshaped");
 			return OEELMatrixCrafting.craftUnshaped(SHAPELESS, inventory, testingForEmpty);
 		} catch(Throwable t) {
 			throw Validate.rethrow(t);
@@ -98,7 +97,6 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 			if(test == null) {
 				test = hash.apply(recipe.subst);
 				cache.put(recipe.substitution, test);
-				System.out.println(test.validation());
 
 				// minor optimization
 				ObfuscatedItemRecipe immediateMatch = OEEL.ITEM_RECIPES.getForInput(test.validation());

@@ -62,10 +62,10 @@ public class OEELMatrixCrafting {
 			ItemHashSubstitution substitution,
 			Inventory inventory,
 			int matrixWidth,
-			int offX,
-			int offY,
 			int width,
 			int height,
+			int offX,
+			int offY,
 			boolean testingForEmpty) {
 		Hasher validation = OEELHashing.FUNCTION.newHasher();
 		Hasher decryption = testingForEmpty ? null : OEELHashing.FUNCTION.newHasher();
