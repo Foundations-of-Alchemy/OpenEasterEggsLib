@@ -76,6 +76,22 @@ public class ItemRecipeBuilder {
 	}
 
 	/**
+	 * used for when the order in which the items are added is the order in which they occur in the inventory (eg. stonecutting, smithing)
+	 */
+	public JsonObject ordered(Identifier id) {
+		Hasher validation = OEELHashing.FUNCTION.newHasher(), encryption = OEELHashing.FUNCTION.newHasher();
+		encryption.putLong(OEELEncrypting.MAGIC);
+		this.hashId(id, validation);
+		this.hashId(id, encryption);
+		for(String input : this.inputs) {
+			validation.putString(input, StandardCharsets.US_ASCII);
+			encryption.putString(input, StandardCharsets.US_ASCII);
+		}
+
+		return this.build(validation.hash(), encryption.hash());
+	}
+
+	/**
 	 * helper to build shaped recipe
 	 */
 	public JsonObject shaped(int width, int height) {
