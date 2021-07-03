@@ -12,6 +12,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.astrarre.itemview.v0.fabric.ItemKey;
 import io.github.astrarre.util.v0.api.Validate;
+import net.devtech.oeel.v0.api.access.DynamicHashSubstitution;
 import net.devtech.oeel.v0.api.access.HashSubstitution;
 import net.devtech.oeel.v0.api.data.MultiJsonDataLoader;
 import net.devtech.oeel.v0.api.util.BlockData;
@@ -34,15 +35,17 @@ public class HashSubstitutionManager<T, E> extends MultiJsonDataLoader<JsonEleme
 	private final Function<Identifier, HashSubstitution<T>> func;
 	private final RegistryKey<Registry<E>> registry;
 	private final Function<T, E> getter;
+	private final Registry<DynamicHashSubstitution<T>> dynamic;
 
 	public HashSubstitutionManager(String dataType,
 			Map<Identifier, HashSubstitution<T>> map,
 			RegistryKey<Registry<E>> registry,
-			Function<T, E> getter) {
+			Function<T, E> getter, Registry<DynamicHashSubstitution<T>> dynamic) {
 		super(dataType, JsonElement.class);
 		this.map = map;
 		this.registry = registry;
 		this.getter = getter;
+		this.dynamic = dynamic;
 		this.func = id1 -> new HasherRef<>(this.map, id1);
 	}
 
@@ -89,7 +92,9 @@ public class HashSubstitutionManager<T, E> extends MultiJsonDataLoader<JsonEleme
 		if(key.startsWith("#")) {
 			return this.substTag(key.substring(1), value);
 		} else if(key.startsWith("$")) {
-			return this.substRef(key, value);
+			return this.substRef(key.substring(1), value);
+		} else if(key.startsWith("&")) {
+			return this.substDynamic(key.substring(1), value);
 		} else if(key.indexOf(':') != -1) {
 			return this.substRegistry(key, value);
 		} else {
@@ -109,6 +114,14 @@ public class HashSubstitutionManager<T, E> extends MultiJsonDataLoader<JsonEleme
 		}
 	}
 
+	protected HashSubstitution<T> substDynamic(String key, JsonElement value) {
+		DynamicHashSubstitution<T> item = this.dynamic.get(new Identifier(key));
+		if(item == null) {
+			throw new IllegalArgumentException("no dynamic hash substitution found for " + key);
+		}
+		return item.apply(value);
+	}
+
 	protected HashSubstitution<T> substTag(String key, JsonElement value) {
 		TagManager manager = ServerTagManagerHolder.getTagManager();
 		Tag<E> tag = manager.getTag(this.registry, new Identifier(key), null);
@@ -122,6 +135,17 @@ public class HashSubstitutionManager<T, E> extends MultiJsonDataLoader<JsonEleme
 	}
 
 	protected HashSubstitution<T> substRegistry(String key, JsonElement value) {
+		E item = (E) Registry.REGISTRIES.getOrThrow((RegistryKey) this.registry).get(new Identifier(key));
+		String replacement = value.getAsString();
+		return (incoming, val) -> {
+			if(this.getter.apply(val) == item) {
+				return replacement;
+			}
+			return incoming;
+		};
+	}
+
+	protected HashSubstitution<T> hasher(String key, JsonElement value) {
 		E item = (E) Registry.REGISTRIES.getOrThrow((RegistryKey) this.registry).get(new Identifier(key));
 		String replacement = value.getAsString();
 		return (incoming, val) -> {

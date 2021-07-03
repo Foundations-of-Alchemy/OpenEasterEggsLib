@@ -1,5 +1,7 @@
 package net.devtech.oeel.v0.api.util;
 
+import java.util.function.Predicate;
+
 import io.github.astrarre.util.v0.api.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,11 +15,9 @@ import net.minecraft.world.chunk.WorldChunk;
 public final class BlockData {
 	protected final World world;
 	protected final BlockPos pos;
-
 	protected WorldChunk chunk;
 	protected BlockState state;
 	protected BlockEntity entity;
-
 
 	public BlockData(@NotNull BlockEntity entity) {
 		this(Validate.notNull(entity.getWorld(), "world == null!"), null, entity.getPos(), entity.getCachedState(), entity);
@@ -55,14 +55,6 @@ public final class BlockData {
 		this(Validate.notNull(entity.getWorld(), "world == null!"), chunk, entity.getPos(), entity.getCachedState(), entity);
 	}
 
-	public WorldChunk getChunk() {
-		WorldChunk chunk = this.chunk;
-		if(chunk == null) {
-			this.chunk = chunk = this.world.getWorldChunk(this.pos);
-		}
-		return chunk;
-	}
-
 	public BlockState getState() {
 		BlockState state = this.state;
 		if(this.state == null) {
@@ -76,10 +68,25 @@ public final class BlockData {
 		return state;
 	}
 
+	public WorldChunk getChunk() {
+		WorldChunk chunk = this.chunk;
+		if(chunk == null) {
+			this.chunk = chunk = this.world.getWorldChunk(this.pos);
+		}
+		return chunk;
+	}
+
 	public BlockEntity getEntity() {
 		BlockEntity entity = this.entity;
-		if(entity == null && this.getState().hasBlockEntity()) {
-			entity = this.getChunk().getBlockEntity(this.pos);
+		if(entity == null) {
+			BlockState state = this.state;
+			if(state == null || state.hasBlockEntity()) {
+				entity = this.getChunk().getBlockEntity(this.pos);
+			}
+
+			if(entity != null && state == null) {
+				this.state = entity.getCachedState();
+			}
 		}
 		return entity;
 	}
@@ -91,5 +98,4 @@ public final class BlockData {
 	public BlockPos getPos() {
 		return this.pos;
 	}
-
 }

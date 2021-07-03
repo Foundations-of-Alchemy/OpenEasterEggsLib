@@ -4,6 +4,7 @@
   "package": "net.devtech.oeel.impl.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "BeaconBlockEntityAccess",
     "ServerResourceManagerMixin_Event"
   ],
   "client": [
