@@ -49,7 +49,7 @@ public class OEELInternal {
 			HashCode decryptionKey = HashCode.fromString(decryption);
 
 			String encryptedOutput = langGetter.apply(langKey);
-			if(encryptedOutput == null) {
+			if(encryptedOutput == null || encryptedOutput.equals(langKey)) {
 				return null;
 			}
 

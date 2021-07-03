@@ -14,9 +14,12 @@ import net.devtech.oeel.v0.api.access.DynamicHashSubstitution;
 import net.devtech.oeel.v0.api.data.ObfRecipeManager;
 import net.devtech.oeel.v0.api.event.ServerResourceManagerLoadEvent;
 import net.devtech.oeel.v0.api.recipes.BaseObfuscatedRecipe;
+import net.devtech.oeel.v0.api.util.BiHasher;
 import net.devtech.oeel.v0.api.util.BlockData;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 

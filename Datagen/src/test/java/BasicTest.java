@@ -22,6 +22,6 @@ public class BasicTest {
 				                   .substCfg("oeel", "standard").shaped(3, 2));
 
 		Item dummy = Registry.register(Registry.ITEM, new Identifier("oeel_test:test_item"), new Item(new Item.Settings()));
-		System.out.println(new LangBuilder().item(dummy, "Test"));
+		System.out.println(new LangBuilder().item(dummy, "Test").build());
 	}
 }

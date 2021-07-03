@@ -78,7 +78,7 @@ public class RecipeBuilder {
 	 * used for when the order in which the items are added is the order in which they occur in the inventory (eg. stonecutting, smithing)
 	 */
 	public JsonObject ordered(Identifier id) {
-		BiHasher hasher = BiHasher.createDefault(true);
+		BiHasher hasher = BiHasher.createDefault(false);
 		hasher.putIdentifier(id);
 
 		for(String input : this.inputs) {
@@ -92,7 +92,7 @@ public class RecipeBuilder {
 	 * helper to build shaped recipe
 	 */
 	public JsonObject shaped(int width, int height) {
-		BiHasher hasher = BiHasher.createDefault(true);
+		BiHasher hasher = BiHasher.createDefault(false);
 		hasher.putIdentifier(ObfuscatedCraftingRecipeBridge.SHAPED);
 		hasher.putInt(width);
 		hasher.putInt(height);
@@ -108,7 +108,7 @@ public class RecipeBuilder {
 	}
 
 	public JsonObject shapeless() {
-		BiHasher hasher = BiHasher.createDefault(true);
+		BiHasher hasher = BiHasher.createDefault(false);
 		hasher.putIdentifier(ObfuscatedCraftingRecipeBridge.SHAPELESS);
 
 		List<String> sorted = new ArrayList<>(this.inputs);
