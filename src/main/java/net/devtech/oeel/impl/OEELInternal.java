@@ -13,7 +13,7 @@ import javax.crypto.spec.SecretKeySpec;
 import com.google.common.hash.Hasher;
 import com.google.gson.JsonObject;
 import io.github.astrarre.util.v0.api.Id;
-import net.devtech.oeel.v0.api.OEELHashing;
+import net.devtech.oeel.v0.api.util.OEELHashing;
 
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.recipe.Recipe;

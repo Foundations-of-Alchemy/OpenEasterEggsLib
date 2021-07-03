@@ -6,14 +6,13 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.google.common.hash.HashCode;
-import com.google.common.hash.Hasher;
 import com.google.gson.JsonObject;
 import net.devtech.oeel.impl.shaped.ObfuscatedCraftingRecipeBridge;
-import net.devtech.oeel.v0.api.OEELEncrypting;
-import net.devtech.oeel.v0.api.OEELHashing;
-import net.devtech.oeel.v0.api.OEELSerializing;
 import net.devtech.oeel.v0.api.recipes.BaseObfuscatedRecipe;
-import net.devtech.oeel.v0.api.recipes.ObfuscatedItemRecipe;
+import net.devtech.oeel.v0.api.util.BiHasher;
+import net.devtech.oeel.v0.api.util.OEELEncrypting;
+import net.devtech.oeel.v0.api.util.OEELHashing;
+import net.devtech.oeel.v0.api.util.OEELSerializing;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -22,7 +21,6 @@ import net.minecraft.util.Identifier;
 /**
  * works for
  * @see BaseObfuscatedRecipe
- * @see ObfuscatedItemRecipe
  */
 public class ItemRecipeBuilder {
 	private static final Identifier ID = new Identifier("oeel", "empty");
@@ -79,58 +77,47 @@ public class ItemRecipeBuilder {
 	 * used for when the order in which the items are added is the order in which they occur in the inventory (eg. stonecutting, smithing)
 	 */
 	public JsonObject ordered(Identifier id) {
-		Hasher validation = OEELHashing.FUNCTION.newHasher(), encryption = OEELHashing.FUNCTION.newHasher();
-		encryption.putLong(OEELEncrypting.MAGIC);
-		this.hashId(id, validation);
-		this.hashId(id, encryption);
+		BiHasher hasher = BiHasher.createDefault(true);
+		hasher.putIdentifier(id);
+
 		for(String input : this.inputs) {
-			validation.putString(input, StandardCharsets.US_ASCII);
-			encryption.putString(input, StandardCharsets.US_ASCII);
+			hasher.putString(input, StandardCharsets.US_ASCII);
 		}
 
-		return this.build(validation.hash(), encryption.hash());
+		return this.build(hasher.hashA(), hasher.hashB());
 	}
 
 	/**
 	 * helper to build shaped recipe
 	 */
 	public JsonObject shaped(int width, int height) {
-		Hasher validation = OEELHashing.FUNCTION.newHasher(), encryption = OEELHashing.FUNCTION.newHasher();
-		encryption.putLong(OEELEncrypting.MAGIC);
+		BiHasher hasher = BiHasher.createDefault(true);
+		hasher.putIdentifier(ObfuscatedCraftingRecipeBridge.SHAPED);
+		hasher.putInt(width);
+		hasher.putInt(height);
 
-		this.hashId(ObfuscatedCraftingRecipeBridge.SHAPED, validation);
-		this.hashId(ObfuscatedCraftingRecipeBridge.SHAPED, encryption);
-		validation.putInt(width);
-		encryption.putInt(width);
-		validation.putInt(height);
-		encryption.putInt(height);
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
 				String hash = inputs.get(x + y * width);
-				validation.putString(hash, StandardCharsets.US_ASCII);
-				encryption.putString(hash, StandardCharsets.US_ASCII);
+				hasher.putString(hash, StandardCharsets.US_ASCII);
 			}
 		}
 
-		return this.build(validation.hash(), encryption.hash());
+		return this.build(hasher.hashA(), hasher.hashB());
 	}
 
 	public JsonObject shapeless() {
-		Hasher validation = OEELHashing.FUNCTION.newHasher(), encryption = OEELHashing.FUNCTION.newHasher();
-		encryption.putLong(OEELEncrypting.MAGIC);
-
-		this.hashId(ObfuscatedCraftingRecipeBridge.SHAPELESS, validation);
-		this.hashId(ObfuscatedCraftingRecipeBridge.SHAPELESS, encryption);
+		BiHasher hasher = BiHasher.createDefault(true);
+		hasher.putIdentifier(ObfuscatedCraftingRecipeBridge.SHAPELESS);
 
 		List<String> sorted = new ArrayList<>(this.inputs);
 		sorted.sort(Comparator.naturalOrder());
 
 		for(String s : sorted) {
-			validation.putString(s, StandardCharsets.US_ASCII);
-			encryption.putString(s, StandardCharsets.US_ASCII);
+			hasher.putString(s, StandardCharsets.US_ASCII);
 		}
 
-		return this.build(validation.hash(), encryption.hash());
+		return this.build(hasher.hashA(), hasher.hashB());
 	}
 
 	protected JsonObject build(HashCode validation, HashCode encryption) {
@@ -141,10 +128,5 @@ public class ItemRecipeBuilder {
 			fin.addProperty("subst", this.subst.toString());
 		}
 		return fin;
-	}
-	
-	protected void hashId(Identifier id, Hasher hasher) {
-		hasher.putString(id.getNamespace(), StandardCharsets.US_ASCII);
-		hasher.putString(id.getPath(), StandardCharsets.US_ASCII);
 	}
 }

@@ -1,4 +1,3 @@
-import net.devtech.oeel.v0.api.OEELHashing;
 import net.devtech.oeel.v0.api.datagen.ItemRecipeBuilder;
 
 import net.minecraft.Bootstrap;

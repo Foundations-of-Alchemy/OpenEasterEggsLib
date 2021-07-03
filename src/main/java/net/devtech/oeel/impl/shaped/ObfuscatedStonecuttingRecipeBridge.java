@@ -11,8 +11,9 @@ import io.github.astrarre.itemview.v0.fabric.ItemKey;
 import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.impl.OEELInternal;
 import net.devtech.oeel.v0.api.EncryptionEntry;
-import net.devtech.oeel.v0.api.OEELEncrypting;
-import net.devtech.oeel.v0.api.OEELHashing;
+import net.devtech.oeel.v0.api.util.BiHasher;
+import net.devtech.oeel.v0.api.util.OEELEncrypting;
+import net.devtech.oeel.v0.api.util.OEELHashing;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -53,29 +54,17 @@ public class ObfuscatedStonecuttingRecipeBridge extends StonecuttingRecipe {
 	public static ItemStack craft(Inventory inventory, boolean testingForEmpty) {
 		try {
 			return ObfuscatedCraftingRecipeBridge.craft(testingForEmpty, substitution -> {
-				Hasher validation = OEELHashing.FUNCTION.newHasher();
-				Hasher decryption = testingForEmpty ? null : OEELHashing.FUNCTION.newHasher();
-
-				validation.putString(ID.getNamespace(), StandardCharsets.US_ASCII);
-				validation.putString(ID.getPath(), StandardCharsets.US_ASCII);
-
-				if(!testingForEmpty) {
-					decryption.putLong(OEELEncrypting.MAGIC);
-					decryption.putString(ID.getNamespace(), StandardCharsets.US_ASCII);
-					decryption.putString(ID.getPath(), StandardCharsets.US_ASCII);
-				}
+				BiHasher hasher = BiHasher.createDefault(testingForEmpty);
+				hasher.putIdentifier(ID);
 
 				ItemStack stack = inventory.getStack(0);
 				String str = OEELHashing.hash(stack).toString();
 				if(substitution != null) {
 					str = substitution.substitute(str, ItemKey.of(stack));
 				}
-				validation.putString(str, StandardCharsets.US_ASCII);
-				if(!testingForEmpty) {
-					decryption.putString(str, StandardCharsets.US_ASCII);
-				}
 
-				return new EncryptionEntry(validation.hash(), testingForEmpty ? null : decryption.hash());
+				hasher.putString(str, StandardCharsets.US_ASCII);
+				return new EncryptionEntry(hasher);
 			});
 		} catch(GeneralSecurityException | IOException e) {
 			throw Validate.rethrow(e);

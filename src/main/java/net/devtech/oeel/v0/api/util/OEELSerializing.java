@@ -1,4 +1,4 @@
-package net.devtech.oeel.v0.api;
+package net.devtech.oeel.v0.api.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

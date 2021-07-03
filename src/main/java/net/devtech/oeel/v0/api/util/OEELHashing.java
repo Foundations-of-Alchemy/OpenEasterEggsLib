@@ -1,22 +1,16 @@
-package net.devtech.oeel.v0.api;
+package net.devtech.oeel.v0.api.util;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
-import io.github.astrarre.itemview.v0.fabric.ItemKey;
 import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.impl.OEELInternal;
-import net.devtech.oeel.v0.api.access.ItemHashSubstitution;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.AbstractNbtList;
@@ -32,7 +26,6 @@ import net.minecraft.nbt.NbtLong;
 import net.minecraft.nbt.NbtLongArray;
 import net.minecraft.nbt.NbtNull;
 import net.minecraft.nbt.NbtShort;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 public class OEELHashing {
