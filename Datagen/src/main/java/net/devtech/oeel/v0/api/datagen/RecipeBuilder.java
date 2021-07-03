@@ -22,28 +22,29 @@ import net.minecraft.util.Identifier;
  * works for
  * @see BaseObfuscatedRecipe
  */
-public class ItemRecipeBuilder {
+public class RecipeBuilder {
 	private static final Identifier ID = new Identifier("oeel", "empty");
 	private final List<String> inputs = new ArrayList<>();
 	private final byte[] output;
 	private Identifier subst;
 
-	public static ItemRecipeBuilder itemOutput(ItemStack output) {
-		return new ItemRecipeBuilder(OEELSerializing.serializeItem(output));
+	public static RecipeBuilder itemOutput(ItemStack output) {
+		return new RecipeBuilder(OEELSerializing.serializeItem(output));
 	}
 
-	public static ItemRecipeBuilder itemOutput(Item output) {
+	public static RecipeBuilder itemOutput(Item output) {
 		return itemOutput(new ItemStack(output));
 	}
 
-	public ItemRecipeBuilder(byte[] output) {
+	public RecipeBuilder(byte[] output) {
 		this.output = output;
 	}
 
 	/**
-	 * used for substitution
+	 * todo substitution json builder and support
+	 * used in case of substitution
 	 */
-	public ItemRecipeBuilder direct(String hash) {
+	public RecipeBuilder direct(String hash) {
 		this.inputs.add(hash);
 		return this;
 	}
@@ -51,24 +52,24 @@ public class ItemRecipeBuilder {
 	/**
 	 * add item input, it should be noted however that this matches the itemstack with no nbt at all
 	 */
-	public ItemRecipeBuilder item(Item item) {
+	public RecipeBuilder item(Item item) {
 		return this.stack(new ItemStack(item));
 	}
 
 	/**
 	 * does not match count
 	 */
-	public ItemRecipeBuilder stack(ItemStack stack) {
+	public RecipeBuilder stack(ItemStack stack) {
 		this.inputs.add(OEELHashing.hash(stack).toString());
 		return this;
 	}
 
-	public ItemRecipeBuilder substCfg(String modid, String path) {
+	public RecipeBuilder substCfg(String modid, String path) {
 		this.subst = new Identifier(modid, path);
 		return this;
 	}
 
-	public ItemRecipeBuilder substCfg(Identifier id) {
+	public RecipeBuilder substCfg(Identifier id) {
 		this.subst = id;
 		return this;
 	}
@@ -98,7 +99,7 @@ public class ItemRecipeBuilder {
 
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
-				String hash = inputs.get(x + y * width);
+				String hash = this.inputs.get(x + y * width);
 				hasher.putString(hash, StandardCharsets.US_ASCII);
 			}
 		}

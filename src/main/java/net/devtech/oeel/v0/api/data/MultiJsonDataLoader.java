@@ -33,7 +33,6 @@ public abstract class MultiJsonDataLoader<T> extends SinglePreparationResourceRe
 
 	@Override
 	protected ListMultimap<Identifier, T> prepare(ResourceManager manager, Profiler profiler) {
-		System.out.println("loading " + this.dataType);
 		ListMultimap<Identifier, T> map = ArrayListMultimap.create();
 		for(Identifier resource : manager.findResources(this.dataType, s -> s.endsWith(".json"))) {
 			try {

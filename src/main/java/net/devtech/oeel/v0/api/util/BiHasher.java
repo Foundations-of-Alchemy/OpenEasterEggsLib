@@ -8,6 +8,7 @@ import com.google.common.hash.Funnel;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hasher;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 public record BiHasher(Hasher a, Hasher b) implements Hasher {
@@ -106,6 +107,13 @@ public record BiHasher(Hasher a, Hasher b) implements Hasher {
 	public Hasher putString(CharSequence charSequence, Charset charset) {
 		if(this.a != null) this.a.putString(charSequence, charset);
 		if(this.b != null) this.b.putString(charSequence, charset);
+		return this;
+	}
+
+	public Hasher putItem(ItemStack stack) {
+		String hash = OEELHashing.hash(stack).toString();
+		if(this.a != null) this.a.putString(hash, StandardCharsets.US_ASCII);
+		if(this.b != null) this.b.putString(hash, StandardCharsets.US_ASCII);
 		return this;
 	}
 

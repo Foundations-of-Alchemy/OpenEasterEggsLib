@@ -12,7 +12,7 @@ import net.devtech.oeel.impl.shaped.ObfuscatedSmithingRecipeBridge;
 import net.devtech.oeel.impl.shaped.ObfuscatedStonecuttingRecipeBridge;
 import net.devtech.oeel.v0.api.access.DynamicHashSubstitution;
 import net.devtech.oeel.v0.api.data.ObfRecipeManager;
-import net.devtech.oeel.v0.api.data.ServerResourceManagerLoadEvent;
+import net.devtech.oeel.v0.api.event.ServerResourceManagerLoadEvent;
 import net.devtech.oeel.v0.api.recipes.BaseObfuscatedRecipe;
 import net.devtech.oeel.v0.api.util.BlockData;
 
@@ -27,8 +27,8 @@ import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 public final class OEEL implements ModInitializer {
 	private static final Gson GSON = new Gson();
 	public static final Registry<DynamicHashSubstitution<ItemKey>> ITEM_HASHER = FabricRegistryBuilder.createSimple((Class)DynamicHashSubstitution.class, new Identifier("oeel:item_hashers")).buildAndRegister();
-	public static final Registry<DynamicHashSubstitution<BlockData>> BLOCK_HASHER = FabricRegistryBuilder.createSimple((Class)DynamicHashSubstitution.class, new Identifier("oeel:item_hashers")).buildAndRegister();
-	public static final Registry<DynamicHashSubstitution<Entity>> ENTITY_HASHER = FabricRegistryBuilder.createSimple((Class)DynamicHashSubstitution.class, new Identifier("oeel:item_hashers")).buildAndRegister();
+	public static final Registry<DynamicHashSubstitution<BlockData>> BLOCK_HASHER = FabricRegistryBuilder.createSimple((Class)DynamicHashSubstitution.class, new Identifier("oeel:block_hashers")).buildAndRegister();
+	public static final Registry<DynamicHashSubstitution<Entity>> ENTITY_HASHER = FabricRegistryBuilder.createSimple((Class)DynamicHashSubstitution.class, new Identifier("oeel:entity_hashers")).buildAndRegister();
 
 	/**
 	 *
@@ -38,8 +38,7 @@ public final class OEEL implements ModInitializer {
 	 */
 	public static final ObfRecipeManager.Ref<BaseObfuscatedRecipe> RECIPES = new ObfRecipeManager.Ref<>();
 
-	@Override
-	public void onInitialize() {
+	public static void init() {
 		Registry.register(BLOCK_HASHER, new Identifier("oeel:beacon_hasher"), element -> new BeaconHasher(GSON.fromJson(element, String[].class)));
 
 		Registry.register(Registry.RECIPE_SERIALIZER, OEELInternal.id("obf_crafting"), ObfuscatedCraftingRecipeBridge.SERIALIZER);
@@ -62,6 +61,11 @@ public final class OEEL implements ModInitializer {
 
 			manager.registerReloader(new ObfRecipeManager<>(RECIPES, "obf_base", BaseObfuscatedRecipe.class));
 		});
+	}
+
+	@Override
+	public void onInitialize() {
+		init();
 	}
 
 }

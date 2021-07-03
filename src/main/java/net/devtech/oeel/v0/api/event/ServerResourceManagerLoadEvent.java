@@ -1,4 +1,4 @@
-package net.devtech.oeel.v0.api.data;
+package net.devtech.oeel.v0.api.event;
 
 import io.github.astrarre.access.v0.api.Access;
 import net.devtech.oeel.impl.OEELInternal;

@@ -1,6 +1,6 @@
 package net.devtech.oeel.impl.mixin;
 
-import net.devtech.oeel.v0.api.data.ServerResourceManagerLoadEvent;
+import net.devtech.oeel.v0.api.event.ServerResourceManagerLoadEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
