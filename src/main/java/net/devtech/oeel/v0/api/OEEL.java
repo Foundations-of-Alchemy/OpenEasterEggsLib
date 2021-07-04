@@ -1,5 +1,6 @@
 package net.devtech.oeel.v0.api;
 
+import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 
 import com.google.gson.Gson;
@@ -12,6 +13,8 @@ import net.devtech.oeel.impl.shaped.ObfuscatedSmithingRecipeBridge;
 import net.devtech.oeel.impl.shaped.ObfuscatedStonecuttingRecipeBridge;
 import net.devtech.oeel.v0.api.access.DynamicHashSubstitution;
 import net.devtech.oeel.v0.api.data.ObfRecipeManager;
+import net.devtech.oeel.v0.api.event.ItemLangOverrideEvent;
+import net.devtech.oeel.v0.api.event.ItemNameOverrideEvent;
 import net.devtech.oeel.v0.api.event.ServerResourceManagerLoadEvent;
 import net.devtech.oeel.v0.api.recipes.BaseObfuscatedRecipe;
 import net.devtech.oeel.v0.api.util.BiHasher;
@@ -40,14 +43,20 @@ public final class OEEL implements ModInitializer {
 	 *
 	 */
 	public static final ObfRecipeManager.Ref<BaseObfuscatedRecipe> RECIPES = new ObfRecipeManager.Ref<>();
+	public static final Identifier DEFAULT_HASHES = new Identifier("oeel:standard");
 
 	public static void init() {
-		Registry.register(BLOCK_HASHER, new Identifier("oeel:beacon_hasher"), element -> new BeaconHasher(GSON.fromJson(element, String[].class)));
+		ItemLangOverrideEvent.EVENT.andThen(stack -> {
+			BiHasher hasher = BiHasher.createDefault(false);
+			hasher.putItem(stack);
+			hasher.putString("standard", StandardCharsets.US_ASCII);
+			return OEELInternal.LANG_STARTER + hasher.hashA() + "." + hasher.hashB();
+		});
 
+		Registry.register(BLOCK_HASHER, new Identifier("oeel:beacon_hasher"), element -> new BeaconHasher(GSON.fromJson(element, String[].class)));
 		Registry.register(Registry.RECIPE_SERIALIZER, OEELInternal.id("obf_crafting"), ObfuscatedCraftingRecipeBridge.SERIALIZER);
 		Registry.register(Registry.RECIPE_SERIALIZER, ObfuscatedStonecuttingRecipeBridge.ID, ObfuscatedStonecuttingRecipeBridge.SERIALIZER);
 		Registry.register(Registry.RECIPE_SERIALIZER, ObfuscatedSmithingRecipeBridge.ID, ObfuscatedSmithingRecipeBridge.SERIALIZER);
-
 		ServerResourceManagerLoadEvent.POST_TAG.andThen((serverResourceManager, manager) -> {
 			manager.registerReloader(new HashSubstitutionManager<>("item_subst",
 			                                                       HashSubstitutionManager.ITEM_HASH_FUNCTIONS,

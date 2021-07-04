@@ -5,8 +5,9 @@
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "BeaconBlockEntityAccess",
-    "ServerResourceManagerMixin_Event",
-    "LanguageMixin_EncryptedOutput"
+    "ItemStackMixin_OverrideTranslation",
+    "LanguageMixin_EncryptedOutput",
+    "ServerResourceManagerMixin_Event"
   ],
   "client": [
   ],

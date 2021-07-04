@@ -2,15 +2,18 @@ package net.devtech.oeel.v0.api.util;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
 
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
+import io.github.astrarre.itemview.v0.fabric.ItemKey;
 import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.impl.OEELInternal;
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.AbstractNbtList;
@@ -26,6 +29,7 @@ import net.minecraft.nbt.NbtLong;
 import net.minecraft.nbt.NbtLongArray;
 import net.minecraft.nbt.NbtNull;
 import net.minecraft.nbt.NbtShort;
+import net.minecraft.state.property.Property;
 import net.minecraft.util.registry.Registry;
 
 public class OEELHashing {
@@ -36,11 +40,36 @@ public class OEELHashing {
 	 */
 	public static boolean COMPAT_MODE = Boolean.getBoolean("compat_mode");
 
+	public static void hash(Hasher hasher, BlockState state) {
+		hash(hasher, Registry.BLOCK, state.getBlock());
+		state.getProperties()
+				.stream()
+				.sorted(Comparator.comparing(Property::getName))
+				.forEachOrdered(property -> hashProperty(hasher, state, property));
+	}
+
+	public static <T> void hash(Hasher hasher, Registry<T> registry, T item) {
+		hasher.putString(registry.getId(item).toString(), StandardCharsets.US_ASCII);
+	}
+
+	public static <T extends Comparable<T>> void hashProperty(Hasher hasher, BlockState state, Property<T> property) {
+		T val = state.get(property);
+		hasher.putString(property.getName(), StandardCharsets.UTF_8);
+		hasher.putString(property.name(val), StandardCharsets.UTF_8);
+	}
+
 	public static HashCode hashWithCount(ItemStack key) {
 		Hasher hasher = FUNCTION.newHasher();
 		hash(hasher, Registry.ITEM, key.getItem());
 		hash(hasher, key.getTag());
 		hasher.putInt(key.getCount());
+		return hasher.hash();
+	}
+
+	public static HashCode hash(ItemKey key) {
+		Hasher hasher = FUNCTION.newHasher();
+		hash(hasher, Registry.ITEM, key.getItem());
+		hash(hasher, key.getTag().toTag());
 		return hasher.hash();
 	}
 
@@ -51,11 +80,8 @@ public class OEELHashing {
 		return hasher.hash();
 	}
 
-	public static <T> void hash(Hasher hasher, Registry<T> registry, T item) {
-		hasher.putString(registry.getId(item).toString(), StandardCharsets.US_ASCII);
-	}
-
 	/**
+	 *
 	 */
 	public static HashCode hashExact(Item item) {
 		Hasher hasher = FUNCTION.newHasher();
