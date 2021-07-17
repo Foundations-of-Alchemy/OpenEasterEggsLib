@@ -130,10 +130,10 @@ public record BiHasher(Hasher a, Hasher b) implements Hasher {
 	}
 
 	public HashCode hashA() {
-		return this.a == null ? null : a.hash();
+		return this.a == null ? null : this.a.hash();
 	}
 
 	public HashCode hashB() {
-		return this.b == null ? null : b.hash();
+		return this.b == null ? null : this.b.hash();
 	}
 }

@@ -12,4 +12,7 @@ public final class NullOutputStream extends OutputStream {
 	@Override public void flush() {}
 	@Override public void close() {}
 	@Override public void write(int b) {}
+	@Override public String toString() {return "NullOutputStream";}
+	@Override public Object clone() {return NULL;}
+	@Override public int hashCode() {return 1;}
 }

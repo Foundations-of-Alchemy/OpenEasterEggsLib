@@ -7,7 +7,9 @@
     "BeaconBlockEntityAccess",
     "ItemStackMixin_OverrideTranslation",
     "LanguageMixin_EncryptedOutput",
-    "ServerResourceManagerMixin_Event"
+    "ModelLoader_InjectObfSpriteAtlas",
+    "ServerResourceManagerMixin_Event",
+    "SpriteAtlasTextureAccess"
   ],
   "client": [
   ],

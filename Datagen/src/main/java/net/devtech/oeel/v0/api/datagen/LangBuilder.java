@@ -31,7 +31,7 @@ public record LangBuilder(Map<String, String> lang) {
 		BiHasher hasher = BiHasher.createDefault(false);
 		hasher.putItem(input);
 		String encrypted = OEELEncrypting.encodeBase16(OEELEncrypting.encrypt(entry.getBytes(StandardCharsets.UTF_8), hasher.hashB()));
-		this.lang.put("lang.hash." + hasher.hashA(), encrypted);
+		this.lang.put("lang.info." + hasher.hashA(), encrypted);
 		return this;
 	}
 

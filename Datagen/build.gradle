@@ -1,4 +1,4 @@
 
 dependencies {
-    modImplementationMapped rootProject
+    implementation rootProject
 }

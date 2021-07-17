@@ -48,7 +48,7 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 	 */
 	public static ItemStack craft(boolean testingForEmpty, Function<HashSubstitution<ItemKey>, EncryptionEntry> hash)
 			throws GeneralSecurityException, IOException {
-		// perhaps instead just iterate through all item hash substitutions
+		// perhaps instead just iterate through all item info substitutions
 		for(HashSubstitution<ItemKey> substitution : OEEL.RECIPES.allItemSubstitutions()) {
 			EncryptionEntry test = hash.apply(substitution);
 			BaseObfuscatedRecipe recipe = OEEL.RECIPES.getForInput(test.validation());

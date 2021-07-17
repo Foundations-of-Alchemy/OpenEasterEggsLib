@@ -117,7 +117,7 @@ public class HashSubstitutionManager<T, E> extends MultiJsonDataLoader<JsonEleme
 	protected HashSubstitution<T> substDynamic(String key, JsonElement value) {
 		DynamicHashSubstitution<T> item = this.dynamic.get(new Identifier(key));
 		if(item == null) {
-			throw new IllegalArgumentException("no dynamic hash substitution found for " + key);
+			throw new IllegalArgumentException("no dynamic info substitution found for " + key);
 		}
 		return item.apply(value);
 	}
@@ -183,7 +183,7 @@ public class HashSubstitutionManager<T, E> extends MultiJsonDataLoader<JsonEleme
 				if(substitution == this) {
 					substitution = null;
 				}
-				this.hasher = hash = Validate.notNull(substitution, "no item hash substitute found for id " + this.id);
+				this.hasher = hash = Validate.notNull(substitution, "no item info substitute found for id " + this.id);
 			}
 			return hash.substitute(incoming, val);
 		}

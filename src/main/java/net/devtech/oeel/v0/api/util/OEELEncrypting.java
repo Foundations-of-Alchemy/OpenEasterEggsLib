@@ -13,7 +13,7 @@ import net.devtech.oeel.impl.OEELInternal;
 
 public class OEELEncrypting {
 	/**
-	 * {@link Hasher#putLong(long)} to create a second hash for the encryption key.
+	 * {@link Hasher#putLong(long)} to create a second info for the encryption key.
 	 */
 	public static final long MAGIC = 0xDEAD_BEEF_CAFE_BABEL;
 

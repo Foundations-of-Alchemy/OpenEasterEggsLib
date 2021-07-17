@@ -25,7 +25,7 @@ import net.minecraft.util.Identifier;
 
 @SuppressWarnings("UnstableApiUsage")
 public class OEELInternal {
-	public static final String LANG_STARTER = "lang.hash.";
+	public static final String LANG_STARTER = "lang.info.";
 	public static final String MODID = "oeel";
 	public static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes(StandardCharsets.US_ASCII);
 

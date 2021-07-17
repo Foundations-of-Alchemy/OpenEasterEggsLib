@@ -36,6 +36,10 @@ public class RecipeBuilder {
 		return itemOutput(new ItemStack(output));
 	}
 
+	public RecipeBuilder(String output) {
+		this.output = output.getBytes(StandardCharsets.UTF_8);
+	}
+
 	public RecipeBuilder(byte[] output) {
 		this.output = output;
 	}

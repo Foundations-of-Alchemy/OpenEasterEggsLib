@@ -9,12 +9,12 @@ import org.jetbrains.annotations.Nullable;
 public interface RecipeManager<T> {
 	/**
 	 * get the recipe for the given input.
-	 * Remember, because {@link OEEL#RECIPES} are global, you must add something to your hash to make it unique.
+	 * Remember, because {@link OEEL#RECIPES} are global, you must add something to your info to make it unique.
 	 * A simple way is to add a string, such as the identifier.
 	 *
-	 * eg. hash input item a + hash input item b + hash input item c + "mymod:uu_crafting" = output
+	 * eg. info input item a + info input item b + info input item c + "mymod:uu_crafting" = output
 	 *
-	 * this will prevent it the hash from colliding with other recipes.
+	 * this will prevent it the info from colliding with other recipes.
 	 */
 	@Nullable
 	T getForInput(HashCode input);

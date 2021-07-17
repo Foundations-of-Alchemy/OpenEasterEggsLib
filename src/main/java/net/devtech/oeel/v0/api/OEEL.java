@@ -8,6 +8,7 @@ import io.github.astrarre.itemview.v0.fabric.ItemKey;
 import net.devtech.oeel.impl.OEELInternal;
 import net.devtech.oeel.impl.hasher.BeaconHasher;
 import net.devtech.oeel.impl.resource.HashSubstitutionManager;
+import net.devtech.oeel.impl.resource.ObfResourceManager;
 import net.devtech.oeel.impl.shaped.ObfuscatedCraftingRecipeBridge;
 import net.devtech.oeel.impl.shaped.ObfuscatedSmithingRecipeBridge;
 import net.devtech.oeel.impl.shaped.ObfuscatedStonecuttingRecipeBridge;
@@ -31,14 +32,14 @@ import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 
 @SuppressWarnings("unchecked")
 public final class OEEL implements ModInitializer {
-	private static final Gson GSON = new Gson();
+	public static final Gson GSON = new Gson();
 	public static final Registry<DynamicHashSubstitution<ItemKey>> ITEM_HASHER = FabricRegistryBuilder.createSimple((Class)DynamicHashSubstitution.class, new Identifier("oeel:item_hashers")).buildAndRegister();
 	public static final Registry<DynamicHashSubstitution<BlockData>> BLOCK_HASHER = FabricRegistryBuilder.createSimple((Class)DynamicHashSubstitution.class, new Identifier("oeel:block_hashers")).buildAndRegister();
 	public static final Registry<DynamicHashSubstitution<Entity>> ENTITY_HASHER = FabricRegistryBuilder.createSimple((Class)DynamicHashSubstitution.class, new Identifier("oeel:entity_hashers")).buildAndRegister();
 
 	/**
 	 *
-	 * It's a bit trickier to efficiently grab recipes from here because of the hash substitutions.
+	 * It's a bit trickier to efficiently grab recipes from here because of the info substitutions.
 	 * An example implementation is provided at {@link ObfuscatedCraftingRecipeBridge#craft(boolean, Function)}.
 	 *
 	 */
@@ -72,6 +73,7 @@ public final class OEEL implements ModInitializer {
 			                                                       Entity::getType, ENTITY_HASHER));
 
 			manager.registerReloader(new ObfRecipeManager<>(RECIPES, "obf_base", BaseObfuscatedRecipe.class));
+			manager.registerReloader(new ObfResourceManager());
 		});
 	}
 

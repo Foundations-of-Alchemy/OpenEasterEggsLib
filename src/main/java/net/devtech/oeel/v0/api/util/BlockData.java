@@ -9,11 +9,14 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldView;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.WorldChunk;
 
-public final class BlockData {
-	protected final World world;
+public class BlockData {
+	protected final BlockView world;
 	protected final BlockPos pos;
 	protected WorldChunk chunk;
 	protected BlockState state;
@@ -23,7 +26,7 @@ public final class BlockData {
 		this(Validate.notNull(entity.getWorld(), "world == null!"), null, entity.getPos(), entity.getCachedState(), entity);
 	}
 
-	public BlockData(@NotNull World world,
+	public BlockData(@NotNull BlockView world,
 			@Nullable WorldChunk chunk,
 			@NotNull BlockPos pos,
 			@Nullable BlockState state,
@@ -35,11 +38,11 @@ public final class BlockData {
 		this.entity = entity;
 	}
 
-	public BlockData(@NotNull World world, @NotNull BlockPos pos) {
+	public BlockData(@NotNull BlockView world, @NotNull BlockPos pos) {
 		this(world, null, pos, null, null);
 	}
 
-	public BlockData(@NotNull World world, @NotNull BlockPos pos, @Nullable BlockState state) {
+	public BlockData(@NotNull BlockView world, @NotNull BlockPos pos, @Nullable BlockState state) {
 		this(world, null, pos, state, null);
 	}
 
@@ -71,7 +74,15 @@ public final class BlockData {
 	public WorldChunk getChunk() {
 		WorldChunk chunk = this.chunk;
 		if(chunk == null) {
-			this.chunk = chunk = this.world.getWorldChunk(this.pos);
+			BlockView view = this.world;
+			if(view instanceof World w) {
+				this.chunk = chunk = w.getWorldChunk(this.pos);
+			} else if(view instanceof WorldView v) {
+				Chunk c = v.getChunk(this.pos);
+				if(c instanceof WorldChunk wc) {
+					this.chunk = chunk = wc;
+				}
+			}
 		}
 		return chunk;
 	}
@@ -91,7 +102,7 @@ public final class BlockData {
 		return entity;
 	}
 
-	public World getWorld() {
+	public BlockView getWorld() {
 		return this.world;
 	}
 
