@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "BeaconBlockEntityAccess",
+    "DataAccess",
     "ItemStackMixin_OverrideTranslation",
     "LanguageMixin_EncryptedOutput",
     "ModelLoader_InjectObfSpriteAtlas",

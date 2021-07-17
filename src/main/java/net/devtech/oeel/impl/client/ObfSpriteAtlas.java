@@ -9,9 +9,12 @@ import java.util.stream.Stream;
 
 import com.google.common.hash.HashCode;
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import io.github.astrarre.util.v0.api.Validate;
+import net.devtech.oeel.impl.mixin.DataAccess;
 import net.devtech.oeel.impl.mixin.SpriteAtlasTextureAccess;
 import net.devtech.oeel.v0.api.OEEL;
 import net.devtech.oeel.v0.api.util.OEELEncrypting;
@@ -22,12 +25,17 @@ import net.minecraft.client.texture.MissingSprite;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.texture.TextureStitcher;
+import net.minecraft.client.texture.TextureTickListener;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.metadata.ResourceMetadataReader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
 
+/**
+ * sprite atlas texture who's textures are encrypted and are lazily decrypted. To get a texture the sprite identifier is [oeel:obf_atlas,
+ * <validation_key><encryption_key>]
+ */
 public class ObfSpriteAtlas extends SpriteAtlasTexture {
 	public static final Identifier OBF_SPRITE_ATLAS_ID = new Identifier("oeel:obf_atlas");
 	public static final MetadataReader READER = new MetadataReader();
@@ -37,10 +45,6 @@ public class ObfSpriteAtlas extends SpriteAtlasTexture {
 
 	public ObfSpriteAtlas() {
 		super(OBF_SPRITE_ATLAS_ID);
-	}
-
-	@Override
-	public void upload(Data data) {
 	}
 
 	@Override
@@ -64,7 +68,7 @@ public class ObfSpriteAtlas extends SpriteAtlasTexture {
 				Pair<Integer, Integer> pair = animMeta.ensureImageSize(obfMeta.width, obfMeta.height);
 				Sprite.Info info = new Sprite.Info(sprite, pair.getFirst(), pair.getSecond(), animMeta);
 				stitcher.add(info);
-				hashCodes.put(info, Pair.of(HashCode.fromString(obfMeta.hash()), resource.getInputStream().readAllBytes()));
+				hashCodes.put(info, Pair.of(HashCode.fromString(obfMeta.hash), resource.getInputStream().readAllBytes()));
 			} catch(IOException e) {
 				e.printStackTrace();
 			}
@@ -91,36 +95,40 @@ public class ObfSpriteAtlas extends SpriteAtlasTexture {
 	@Override
 	public Sprite getSprite(Identifier id) {
 		Map<Identifier, Sprite> spriteMap = ((SpriteAtlasTextureAccess) this).getSprites();
-		Sprite sprite = spriteMap.get(id);
-		if(sprite == null) {
-			HashCode code;
+		return spriteMap.computeIfAbsent(id, i -> {
 			try {
-				code = HashCode.fromString(id.getNamespace());
-			} catch(IllegalArgumentException e) {
+				HashCode code = HashCode.fromString(i.getNamespace());
+				ObfEntry entry = this.encryptedSprites.remove(code);
+				return this.unencryptSprite(i, entry);
+			} catch(IllegalArgumentException | NullPointerException e) {
 				return this.missingSprite;
+			} catch(GeneralSecurityException | IOException e) {
+				throw Validate.rethrow(e);
 			}
-			ObfEntry entry = this.encryptedSprites.remove(code);
-			if(entry != null) {
-				try {
-					HashCode encryptionKey = HashCode.fromString(id.getPath());
-					byte[] decryptedBytes = OEELEncrypting.decrypt(encryptionKey, entry.encryptedData());
-					Sprite s = ((SpriteAtlasTextureAccess)this).callLoadSprite(new ResourceManagerHack(decryptedBytes), entry.info, entry.atlasWidth, entry.atlasHeight, entry.maxLevel, entry.x, entry.y);
-					spriteMap.put(id, s);
-					return s;
-				} catch(GeneralSecurityException | IOException e) {
-					throw Validate.rethrow(e);
-				} catch(IllegalArgumentException e) {
-					return this.missingSprite;
-				}
-			} else {
-				return this.missingSprite;
-			}
-		} else {
-			return sprite;
-		}
+		});
 	}
 
-	record ObfMetadata(String hash, int width, int height) {}
+	private Sprite unencryptSprite(Identifier id, ObfEntry entry) throws GeneralSecurityException, IOException {
+		HashCode encryptionKey = HashCode.fromString(id.getPath());
+		byte[] decryptedBytes = OEELEncrypting.decrypt(encryptionKey, entry.encryptedData());
+		SpriteAtlasTextureAccess access = (SpriteAtlasTextureAccess) this;
+		var hack = new ResourceManagerHack(decryptedBytes);
+		Sprite sprite = access.callLoadSprite(hack, entry.info, entry.atlasWidth, entry.atlasHeight, entry.maxLevel, entry.x, entry.y);
+		this.bindTexture();
+		sprite.upload();
+		TextureTickListener textureTickListener = sprite.getAnimation();
+		if(textureTickListener != null) {
+			((SpriteAtlasTextureAccess) this).getAnimatedSprites().add(textureTickListener);
+		}
+
+		return sprite;
+	}
+
+	static final class ObfMetadata {
+		String hash;
+		int width;
+		int height;
+	}
 
 	record ObfEntry(Sprite.Info info, int atlasWidth, int atlasHeight, int x, int y, int maxLevel, byte[] encryptedData) {}
 

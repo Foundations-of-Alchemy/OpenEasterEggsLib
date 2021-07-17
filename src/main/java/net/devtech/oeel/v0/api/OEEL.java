@@ -47,12 +47,12 @@ public final class OEEL implements ModInitializer {
 	public static final Identifier DEFAULT_HASHES = new Identifier("oeel:standard");
 
 	public static void init() {
-		ItemLangOverrideEvent.EVENT.andThen(stack -> {
+		/*ItemLangOverrideEvent.EVENT.andThen(stack -> {
 			BiHasher hasher = BiHasher.createDefault(false);
 			hasher.putItem(stack);
 			hasher.putString("standard", StandardCharsets.US_ASCII);
 			return OEELInternal.LANG_STARTER + hasher.hashA() + "." + hasher.hashB();
-		});
+		});*/
 
 		Registry.register(BLOCK_HASHER, new Identifier("oeel:beacon_hasher"), element -> new BeaconHasher(GSON.fromJson(element, String[].class)));
 		Registry.register(Registry.RECIPE_SERIALIZER, OEELInternal.id("obf_crafting"), ObfuscatedCraftingRecipeBridge.SERIALIZER);

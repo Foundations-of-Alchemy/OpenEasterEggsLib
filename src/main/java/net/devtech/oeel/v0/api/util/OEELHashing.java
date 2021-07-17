@@ -29,6 +29,7 @@ import net.minecraft.nbt.NbtLong;
 import net.minecraft.nbt.NbtLongArray;
 import net.minecraft.nbt.NbtNull;
 import net.minecraft.nbt.NbtShort;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.registry.Registry;
 
@@ -137,6 +138,8 @@ public class OEELHashing {
 			hasher.putDouble(d.doubleValue());
 		} else if(element instanceof NbtNull) {
 			hasher.putString("null", StandardCharsets.US_ASCII);
+		} else if(element instanceof NbtString s) {
+			hasher.putString(s.asString(), StandardCharsets.UTF_8);
 		} else if(COMPAT_MODE) {
 			OEELInternal.HashingOutput output = new OEELInternal.HashingOutput(hasher);
 			try {
@@ -145,7 +148,7 @@ public class OEELHashing {
 				throw Validate.rethrow(e);
 			}
 		} else {
-			throw new UnsupportedOperationException("fail");
+			throw new UnsupportedOperationException("unknown type " + element.getClass());
 		}
 	}
 }

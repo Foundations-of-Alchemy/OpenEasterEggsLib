@@ -4,11 +4,21 @@ plugins {
     id 'java-library'
 }
 
-
 subprojects {
     apply plugin: 'maven-publish'
     apply plugin: 'fabric-loom'
     apply plugin: 'java-library'
+}
+
+sourceSets {
+    testmod {
+        compileClasspath += main.compileClasspath
+        runtimeClasspath += main.runtimeClasspath
+    }
+}
+
+dependencies {
+    testmodImplementation sourceSets.main.output
 }
 
 allprojects {

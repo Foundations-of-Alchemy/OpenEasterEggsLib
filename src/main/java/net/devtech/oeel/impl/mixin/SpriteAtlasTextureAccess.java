@@ -1,5 +1,6 @@
 package net.devtech.oeel.impl.mixin;
 
+import java.util.List;
 import java.util.Map;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -8,6 +9,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.client.texture.TextureTickListener;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 
@@ -18,4 +20,7 @@ public interface SpriteAtlasTextureAccess {
 
 	@Accessor
 	Map<Identifier, Sprite> getSprites();
+
+	@Accessor
+	List<TextureTickListener> getAnimatedSprites();
 }
