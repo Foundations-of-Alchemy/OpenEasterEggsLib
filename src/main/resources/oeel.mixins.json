@@ -5,12 +5,10 @@
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "BeaconBlockEntityAccess",
-    "DataAccess",
     "ItemStackMixin_OverrideTranslation",
     "LanguageMixin_EncryptedOutput",
-    "ModelLoader_InjectObfSpriteAtlas",
     "ServerResourceManagerMixin_Event",
-    "SpriteAtlasTextureAccess"
+    "SpriteAtlasTextureMixin_ObfSupport"
   ],
   "client": [
   ],

@@ -13,6 +13,7 @@ import yeet.client.CubeModel;
 import yeet.client.TestModelProvider;
 
 import net.minecraft.client.render.model.ModelLoader;
+import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
@@ -28,8 +29,8 @@ public class A implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		ModelLoadingRegistry.INSTANCE.registerResourceProvider(r -> new TestModelProvider());
-		SpriteIdentifier identifier = new SpriteIdentifier(ObfSpriteAtlas.OBF_SPRITE_ATLAS_ID, new Identifier("deadbeefcafebabe:bebafecaefbeadde"));
-		TestModelProvider.add(new CubeModel(ModelLoader.FIRE_0, CubeData.withAll(identifier)), "item/test_item");
+		SpriteIdentifier identifier = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier("deadbeefcafebabe:bebafecaefbeadde"));
+		TestModelProvider.add(new CubeModel(identifier, CubeData.withAll(identifier)), "item/test_item");
 
 		Registry.register(Registry.ITEM, id("test_item"), new Item(new Item.Settings()));
 	}

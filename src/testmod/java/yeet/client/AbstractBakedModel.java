@@ -11,12 +11,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import io.github.astrarre.util.v0.api.Lazy;
+import net.devtech.oeel.impl.client.ObfSpriteAtlas;
 import org.jetbrains.annotations.Nullable;
 import yeet.A;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.ModelBakeSettings;
@@ -126,20 +129,19 @@ public abstract class AbstractBakedModel implements UnbakedModel {
 		return RESOLVED.get(this.particles);
 	}
 
-
 	public ModelOverrideList getOverrides() {
 		return ModelOverrideList.EMPTY;
 	}
 
 	@Override
 	public Collection<Identifier> getModelDependencies() {
-		return Collections.singleton(this.getItemTransformationParentId());
+		return Collections.emptyList();
 	}
 
 	@Override
 	public Collection<SpriteIdentifier> getTextureDependencies(Function<Identifier, UnbakedModel> unbakedModelGetter,
 			Set<Pair<String, String>> unresolvedTextureReferences) {
-		return this.textureDependencies;
+		return Collections.emptyList();
 	}
 
 	protected Identifier getItemTransformationParentId() {
@@ -154,9 +156,6 @@ public abstract class AbstractBakedModel implements UnbakedModel {
 			Identifier modelId) {
 		JsonUnbakedModel defaultBlockModel = (JsonUnbakedModel) loader.getOrLoadModel(this.getItemTransformationParentId());
 		this.itemTransformation = defaultBlockModel.getTransformations();
-		for (SpriteIdentifier s : this.textureDependencies) {
-			RESOLVED.computeIfAbsent(s, textureGetter);
-		}
 		MeshBuilder builder = RENDERER.get().meshBuilder();
 		boolean builtMesh = this.build(RENDERER.get(), builder.getEmitter(), loader, textureGetter, rotationContainer, modelId);
 		if(builtMesh) {
