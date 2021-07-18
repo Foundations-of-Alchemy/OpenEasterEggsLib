@@ -1,13 +1,10 @@
 package net.devtech.oeel.impl.shaped;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 import com.google.common.hash.Hasher;
@@ -16,7 +13,7 @@ import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.impl.OEELInternal;
 import net.devtech.oeel.v0.api.EncryptionEntry;
 import net.devtech.oeel.v0.api.OEEL;
-import net.devtech.oeel.v0.api.access.HashSubstitution;
+import net.devtech.oeel.v0.api.access.HashFunction;
 import net.devtech.oeel.v0.api.recipes.BaseObfuscatedRecipe;
 import net.devtech.oeel.v0.api.util.BiHasher;
 import net.devtech.oeel.v0.api.util.OEELEncrypting;
@@ -46,11 +43,11 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 	/**
 	 * @param testingForEmpty if true, the output stack is not decrypted, and instead a non-empty stack is returned.
 	 */
-	public static ItemStack craft(boolean testingForEmpty, Function<HashSubstitution<ItemKey>, EncryptionEntry> hash)
+	public static ItemStack craft(boolean testingForEmpty, Function<HashFunction<ItemKey>, EncryptionEntry> hash)
 			throws GeneralSecurityException, IOException {
 		// perhaps instead just iterate through all item info substitutions
-		for(HashSubstitution<ItemKey> substitution : OEEL.RECIPES.allItemSubstitutions()) {
-			EncryptionEntry test = hash.apply(substitution);
+		for(HashFunction<ItemKey> function : OEEL.RECIPES.allItemFunctions()) {
+			EncryptionEntry test = hash.apply(function);
 			BaseObfuscatedRecipe recipe = OEEL.RECIPES.getForInput(test.validation());
 			if(recipe != null) {
 				if(testingForEmpty) {
@@ -78,7 +75,7 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 				for(int offY = 0; offY <= matrixHeight - height; offY++) {
 					final int finalOffX = offX;
 					final int finalOffY = offY;
-					final Function<HashSubstitution<ItemKey>, EncryptionEntry> func;
+					final Function<HashFunction<ItemKey>, EncryptionEntry> func;
 					func = (s) -> hashMatrix(shaped, s, inventory, matrixWidth, width, height, finalOffX, finalOffY, testingForEmpty);
 					ItemStack craft = craft(testingForEmpty, func);
 					if(!craft.isEmpty()) {
@@ -99,7 +96,7 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 	 * @param testingForEmpty if true {@link EncryptionEntry#encryption()} is null
 	 */
 	public static EncryptionEntry hashMatrix(Identifier id,
-			HashSubstitution<ItemKey> substitution,
+			HashFunction<ItemKey> hashFunction,
 			Inventory inventory,
 			int matrixWidth,
 			int width,
@@ -115,11 +112,7 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
 				ItemStack stack = inventory.getStack((offX + x) + (offY + y) * matrixWidth);
-				String str = OEELHashing.hash(stack).toString();
-				if(substitution != null) {
-					str = substitution.substitute(str, ItemKey.of(stack));
-				}
-				hasher.putString(str, StandardCharsets.US_ASCII);
+				hashFunction.hash(hasher, ItemKey.of(stack));
 			}
 		}
 
@@ -131,7 +124,7 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 	 */
 	public static ItemStack craftUnshaped(Identifier unshaped, Inventory inventory, boolean testingForEmpty) {
 		try {
-			return craft(testingForEmpty, substitution -> hashInventoryUnordered(unshaped, substitution, inventory, testingForEmpty));
+			return craft(testingForEmpty, func -> hashInventoryUnordered(unshaped, func, inventory, testingForEmpty));
 		} catch(GeneralSecurityException | IOException e) {
 			throw Validate.rethrow(e);
 		}
@@ -142,38 +135,30 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 	 *
 	 * @param id a unique id for this type of recipe, eg. oeel:shapeless
 	 */
-	public static EncryptionEntry hashInventoryUnordered(Identifier id, HashSubstitution<ItemKey> substitution, Inventory inventory, boolean testingForEmpty) {
-		List<String> items = new ArrayList<>();
+	public static EncryptionEntry hashInventoryUnordered(Identifier id,
+			HashFunction<ItemKey> hashFunction,
+			Inventory inventory,
+			boolean testingForEmpty) {
+		List<byte[]> items = new ArrayList<>();
 		for(int i = 0; i < inventory.size(); i++) {
 			ItemStack stack = inventory.getStack(i);
 			if(!stack.isEmpty()) {
-				String str = OEELHashing.hash(stack).toString();
-				if(substitution != null) {
-					str = substitution.substitute(str, ItemKey.of(stack));
-				}
-				items.add(str);
+				Hasher hasher = OEELHashing.FUNCTION.newHasher();
+				hashFunction.hash(hasher, ItemKey.of(stack));
+				items.add(hasher.hash().asBytes());
 			}
 		}
 
-		items.sort(Comparator.naturalOrder());
+		items.sort(Arrays::compare);
 
-		Hasher validation = OEELHashing.FUNCTION.newHasher(), decryption = testingForEmpty ? null : OEELHashing.FUNCTION.newHasher();
-		validation.putString(id.getNamespace(), StandardCharsets.US_ASCII);
-		validation.putString(id.getPath(), StandardCharsets.US_ASCII);
-		if(!testingForEmpty) {
-			decryption.putLong(OEELEncrypting.MAGIC);
-			decryption.putString(id.getNamespace(), StandardCharsets.US_ASCII);
-			decryption.putString(id.getPath(), StandardCharsets.US_ASCII);
+		BiHasher hasher = BiHasher.createDefault(testingForEmpty);
+		hasher.putIdentifier(id);
+
+		for(byte[] item : items) {
+			hasher.putBytes(item);
 		}
 
-		for(String item : items) {
-			validation.putString(item, StandardCharsets.US_ASCII);
-			if(!testingForEmpty) {
-				decryption.putString(item, StandardCharsets.US_ASCII);
-			}
-		}
-
-		return new EncryptionEntry(validation.hash(), testingForEmpty ? null : decryption.hash());
+		return new EncryptionEntry(hasher);
 	}
 
 	@Override
@@ -200,13 +185,7 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 		try {
 			for(int width = 1; width <= 3; width++) {
 				for(int height = 1; height <= 3; height++) {
-					ItemStack stack = craftShaped(SHAPED,
-					                                                 inventory,
-					                                                 inventory.getWidth(),
-					                                                 inventory.getHeight(),
-					                                                 width,
-					                                                 height,
-					                                                 testingForEmpty);
+					ItemStack stack = craftShaped(SHAPED, inventory, inventory.getWidth(), inventory.getHeight(), width, height, testingForEmpty);
 					if(!stack.isEmpty()) {
 						return stack;
 					}

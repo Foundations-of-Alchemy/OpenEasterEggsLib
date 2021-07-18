@@ -1,4 +1,4 @@
-package net.devtech.oeel.impl.resource;
+package net.devtech.oeel.v0.api;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,10 +19,10 @@ import net.minecraft.resource.SinglePreparationResourceReloader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
 
-public class ObfResourceManager extends SinglePreparationResourceReloader<Map<HashCode, byte[]>> {
+public class ObfResourceManager extends SinglePreparationResourceReloader<Map<Identifier, byte[]>> {
 	private static final List<Consumer<ObfResourceManager>> ON_RELOAD = new ArrayList<>();
 	public static ObfResourceManager active;
-	private Map<HashCode, byte[]> encryptedData;
+	private Map<Identifier, byte[]> encryptedData;
 
 	public ObfResourceManager() {
 		active = this;
@@ -38,8 +38,8 @@ public class ObfResourceManager extends SinglePreparationResourceReloader<Map<Ha
 	/**
 	 * Does not cache the output, removes the data in the storage if found
 	 */
-	public byte[] decryptOnce(HashCode validation, HashCode decryption) throws GeneralSecurityException, IOException {
-		byte[] data = this.encryptedData.remove(validation);
+	public byte[] decryptOnce(Identifier key, HashCode decryption) throws GeneralSecurityException, IOException {
+		byte[] data = this.encryptedData.remove(key);
 		if(data == null) {
 			return null;
 		} else {
@@ -48,15 +48,14 @@ public class ObfResourceManager extends SinglePreparationResourceReloader<Map<Ha
 	}
 
 	@Override
-	protected Map<HashCode, byte[]> prepare(ResourceManager manager, Profiler profiler) {
-		Map<HashCode, byte[]> encryptedData = new HashMap<>();
-		for(Identifier resourceId : manager.findResources("obf_rss", s -> s.endsWith(".data"))) {
+	protected Map<Identifier, byte[]> prepare(ResourceManager manager, Profiler profiler) {
+		Map<Identifier, byte[]> encryptedData = new HashMap<>();
+		for(Identifier resourceId : manager.findResources("obf_rss/", s -> s.endsWith(".data"))) {
 			try {
-				String path = resourceId.getPath();
-				HashCode hashCode = HashCode.fromString(path.substring(path.lastIndexOf('/') + 1, path.length() - 5));
 				try(Resource resource = manager.getResource(resourceId)) {
 					if(resource != null) {
-						encryptedData.put(hashCode, resource.getInputStream().readAllBytes());
+						Identifier id = new Identifier(resourceId.getNamespace(), resourceId.getPath().substring(8));
+						encryptedData.put(id, resource.getInputStream().readAllBytes());
 					} else {
 						throw new FileNotFoundException(resourceId + "");
 					}
@@ -70,7 +69,7 @@ public class ObfResourceManager extends SinglePreparationResourceReloader<Map<Ha
 	}
 
 	@Override
-	protected void apply(Map<HashCode, byte[]> prepared, ResourceManager manager, Profiler profiler) {
+	protected void apply(Map<Identifier, byte[]> prepared, ResourceManager manager, Profiler profiler) {
 		this.encryptedData = prepared;
 	}
 }

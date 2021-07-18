@@ -13,8 +13,8 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import io.github.astrarre.itemview.v0.fabric.ItemKey;
 import io.github.astrarre.util.v0.api.Validate;
-import net.devtech.oeel.impl.resource.HashSubstitutionManager;
-import net.devtech.oeel.v0.api.access.HashSubstitution;
+import net.devtech.oeel.impl.resource.HashFunctionManager;
+import net.devtech.oeel.v0.api.access.HashFunction;
 import net.devtech.oeel.v0.api.util.BlockData;
 import net.devtech.oeel.v0.api.util.OEELEncrypting;
 import org.jetbrains.annotations.Nullable;
@@ -31,63 +31,62 @@ public class BaseObfuscatedRecipe {
 		protected BaseObfuscatedRecipe deserialize(JsonObject object,
 				HashCode inputHash,
 				byte[] encryptedOutput,
-				Identifier itemHashSubstitution,
-				Identifier entityHashSubstitution,
-				Identifier blockHashSubstitution) {
-			return new BaseObfuscatedRecipe(inputHash, encryptedOutput, itemHashSubstitution, entityHashSubstitution, blockHashSubstitution);
+				Identifier itemHashFunction,
+				Identifier entityHashFunction,
+				Identifier blockHashFunction) {
+			return new BaseObfuscatedRecipe(inputHash, encryptedOutput, itemHashFunction, entityHashFunction, blockHashFunction);
 		}
 	};
 
 	public final HashCode inputHash;
 	public final byte[] encryptedOutput;
 	@Nullable
-	public final Identifier itemHashSubstitution, entityHashSubstitution, blockHashSubstitution;
-	protected HashSubstitution<ItemKey> item;
-	protected HashSubstitution<Entity> entity;
-	protected HashSubstitution<BlockData> block;
+	public final Identifier itemHashFunction, entityHashFunction, blockHashFunction;
+	protected HashFunction<ItemKey> item;
+	protected HashFunction<Entity> entity;
+	protected HashFunction<BlockData> block;
 
 	public BaseObfuscatedRecipe(HashCode hash,
 			byte[] output,
-			@Nullable Identifier itemHashSubstitution,
-			@Nullable Identifier entityHashSubstitution,
-			@Nullable Identifier blockHashSubstitution) {
+			@Nullable Identifier itemHashFunction,
+			@Nullable Identifier entityHashFunction,
+			@Nullable Identifier blockHashFunction) {
 		this.inputHash = hash;
 		this.encryptedOutput = output;
-		this.itemHashSubstitution = itemHashSubstitution;
-		this.entityHashSubstitution = entityHashSubstitution;
-		this.blockHashSubstitution = blockHashSubstitution;
+		this.itemHashFunction = itemHashFunction;
+		this.entityHashFunction = entityHashFunction;
+		this.blockHashFunction = blockHashFunction;
 	}
 
-	public HashSubstitution<ItemKey> getItemHashSubstitution() {
-		HashSubstitution<ItemKey> item = this.item;
+	public HashFunction<ItemKey> getItemHashFunction() {
+		HashFunction<ItemKey> item = this.item;
 		if(item == null) {
-			Identifier id = this.itemHashSubstitution;
+			Identifier id = this.itemHashFunction;
 			if(id == null) return null;
-			this.item = item = HashSubstitutionManager.item(id);
+			this.item = item = HashFunctionManager.item(id);
 		}
 		return item;
 	}
 
-	public HashSubstitution<Entity> getEntityHashSubstitution() {
-		HashSubstitution<Entity> entity = this.entity;
+	public HashFunction<Entity> getEntityHashFunction() {
+		HashFunction<Entity> entity = this.entity;
 		if(entity == null) {
-			Identifier id = this.entityHashSubstitution;
+			Identifier id = this.entityHashFunction;
 			if(id == null) return null;
-			this.entity = entity = HashSubstitutionManager.entity(id);
+			this.entity = entity = HashFunctionManager.entity(id);
 		}
 		return entity;
 	}
 
-	public HashSubstitution<BlockData> getBlockHashSubstitution() {
-		HashSubstitution<BlockData> block = this.block;
+	public HashFunction<BlockData> getBlockHashFunction() {
+		HashFunction<BlockData> block = this.block;
 		if(block == null) {
-			Identifier id = this.blockHashSubstitution;
+			Identifier id = this.blockHashFunction;
 			if(id == null) return null;
-			this.block = block = HashSubstitutionManager.block(id);
+			this.block = block = HashFunctionManager.block(id);
 		}
 		return block;
 	}
-
 
 	public static abstract class Serializer<T extends BaseObfuscatedRecipe> implements JsonSerializer<T>, JsonDeserializer<T> {
 		@Override
@@ -103,22 +102,22 @@ public class BaseObfuscatedRecipe {
 			JsonObject object = json.getAsJsonObject();
 			String inputHashString = Validate.notNull(object.getAsJsonPrimitive("input"), "recipe must have input!").getAsString();
 			String encryptedOutputString = Validate.notNull(object.getAsJsonPrimitive("output"), "recipe must have output!").getAsString();
-			String itemHashSubst = Validate.transform(object.getAsJsonPrimitive("item_subst"), JsonPrimitive::getAsString);
-			String entityHashSubst = Validate.transform(object.getAsJsonPrimitive("entity_subst"), JsonPrimitive::getAsString);
-			String blockHashSubst = Validate.transform(object.getAsJsonPrimitive("block_subst"), JsonPrimitive::getAsString);
+			String itemHashFunc = Validate.transform(object.getAsJsonPrimitive("item"), JsonPrimitive::getAsString);
+			String entityHashFunc = Validate.transform(object.getAsJsonPrimitive("entity"), JsonPrimitive::getAsString);
+			String blockHashFunc = Validate.transform(object.getAsJsonPrimitive("block"), JsonPrimitive::getAsString);
 			return this.deserialize(object,
 			                        HashCode.fromString(inputHashString),
 			                        OEELEncrypting.decodeBase16(encryptedOutputString),
-			                        Validate.transform(itemHashSubst, Identifier::new),
-			                        Validate.transform(entityHashSubst, Identifier::new),
-			                        Validate.transform(blockHashSubst, Identifier::new));
+			                        Validate.transform(itemHashFunc, Identifier::new),
+			                        Validate.transform(entityHashFunc, Identifier::new),
+			                        Validate.transform(blockHashFunc, Identifier::new));
 		}
 
 		protected abstract T deserialize(JsonObject object,
 				HashCode inputHash,
 				byte[] encryptedOutput,
-				Identifier itemHashSubstitution,
-				Identifier entityHashSubstitution,
-				Identifier blockHashSubstitution);
+				Identifier itemHashFunction,
+				Identifier entityHashFunction,
+				Identifier blockHashFunction);
 	}
 }

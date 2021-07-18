@@ -53,17 +53,12 @@ public class ObfuscatedStonecuttingRecipeBridge extends StonecuttingRecipe {
 
 	public static ItemStack craft(Inventory inventory, boolean testingForEmpty) {
 		try {
-			return ObfuscatedCraftingRecipeBridge.craft(testingForEmpty, substitution -> {
+			return ObfuscatedCraftingRecipeBridge.craft(testingForEmpty, function -> {
 				BiHasher hasher = BiHasher.createDefault(testingForEmpty);
 				hasher.putIdentifier(ID);
-
 				ItemStack stack = inventory.getStack(0);
-				String str = OEELHashing.hash(stack).toString();
-				if(substitution != null) {
-					str = substitution.substitute(str, ItemKey.of(stack));
-				}
-
-				hasher.putString(str, StandardCharsets.US_ASCII);
+				function.hash(hasher, ItemKey.of(stack));
+				// oh fuck I may need to also have amount idk
 				return new EncryptionEntry(hasher);
 			});
 		} catch(GeneralSecurityException | IOException e) {

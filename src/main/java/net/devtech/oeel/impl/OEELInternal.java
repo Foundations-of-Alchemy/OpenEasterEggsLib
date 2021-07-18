@@ -25,7 +25,6 @@ import net.minecraft.util.Identifier;
 
 @SuppressWarnings("UnstableApiUsage")
 public class OEELInternal {
-	public static final String LANG_STARTER = "lang.info.";
 	public static final String MODID = "oeel";
 	public static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes(StandardCharsets.US_ASCII);
 
@@ -35,28 +34,6 @@ public class OEELInternal {
 
 	public static Id id2(String path) {
 		return Id.create(MODID, path);
-	}
-
-	public static String decodeLang(String key, UnaryOperator<String> langGetter) throws GeneralSecurityException, IOException {
-		if(key.startsWith(LANG_STARTER)) {
-			int index = key.lastIndexOf('.');
-			if(index <= LANG_STARTER.length()) {
-				return null;
-			}
-
-			String langKey = key.substring(0, index); // the key in the en_us.json file
-			String decryption = key.substring(index + 1); // the decryption key
-			HashCode decryptionKey = HashCode.fromString(decryption);
-
-			String encryptedOutput = langGetter.apply(langKey);
-			if(encryptedOutput == null || encryptedOutput.equals(langKey)) {
-				return null;
-			}
-
-			byte[] decryptedOutput = OEELEncrypting.decrypt(decryptionKey, OEELEncrypting.decodeBase16(encryptedOutput));
-			return new String(decryptedOutput, StandardCharsets.UTF_8);
-		}
-		return null;
 	}
 
 	public static byte[] crypt(byte[] keyBytes, byte[] inputBytes, int mode) throws GeneralSecurityException {

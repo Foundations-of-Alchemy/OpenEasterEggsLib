@@ -111,9 +111,7 @@ public record BiHasher(Hasher a, Hasher b) implements Hasher {
 	}
 
 	public Hasher putItem(ItemStack stack) {
-		String hash = OEELHashing.hash(stack).toString();
-		if(this.a != null) this.a.putString(hash, StandardCharsets.US_ASCII);
-		if(this.b != null) this.b.putString(hash, StandardCharsets.US_ASCII);
+		OEELHashing.hash(this, stack);
 		return this;
 	}
 

@@ -59,36 +59,25 @@ public class OEELHashing {
 		hasher.putString(property.name(val), StandardCharsets.UTF_8);
 	}
 
-	public static HashCode hashWithCount(ItemStack key) {
-		Hasher hasher = FUNCTION.newHasher();
+	public static void hashWithCount(Hasher hasher, ItemStack key) {
 		hash(hasher, Registry.ITEM, key.getItem());
 		hash(hasher, key.getTag());
 		hasher.putInt(key.getCount());
-		return hasher.hash();
 	}
 
-	public static HashCode hash(ItemKey key) {
-		Hasher hasher = FUNCTION.newHasher();
+	public static void hash(Hasher hasher, ItemKey key) {
 		hash(hasher, Registry.ITEM, key.getItem());
 		hash(hasher, key.getTag().toTag());
-		return hasher.hash();
 	}
 
-	public static HashCode hash(ItemStack key) {
-		Hasher hasher = FUNCTION.newHasher();
+	public static void hash(Hasher hasher, ItemStack key) {
 		hash(hasher, Registry.ITEM, key.getItem());
 		hash(hasher, key.getTag());
-		return hasher.hash();
 	}
 
-	/**
-	 *
-	 */
-	public static HashCode hashExact(Item item) {
-		Hasher hasher = FUNCTION.newHasher();
+	public static void hashExact(Hasher hasher, Item item) {
 		hash(hasher, Registry.ITEM, item);
 		hash(hasher, (NbtElement) null);
-		return hasher.hash();
 	}
 
 	public static void hash(Hasher hasher, @Nullable NbtElement element) {

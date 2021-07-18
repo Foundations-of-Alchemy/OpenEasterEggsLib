@@ -57,17 +57,12 @@ public class ObfuscatedSmithingRecipeBridge extends SmithingRecipe {
 
 	public static ItemStack craft(Inventory inventory, boolean testingForEmpty) {
 		try {
-			return ObfuscatedCraftingRecipeBridge.craft(testingForEmpty, substitution -> {
+			return ObfuscatedCraftingRecipeBridge.craft(testingForEmpty, function -> {
 				BiHasher hasher = BiHasher.createDefault(testingForEmpty);
 				hasher.putIdentifier(ID);
-
 				for(int i = 0; i < 2; i++) {
 					ItemStack stack = inventory.getStack(i);
-					String str = OEELHashing.hash(stack).toString();
-					if(substitution != null) {
-						str = substitution.substitute(str, ItemKey.of(stack));
-					}
-					hasher.putString(str, StandardCharsets.US_ASCII);
+					function.hash(hasher, ItemKey.of(stack));
 				}
 				return new EncryptionEntry(hasher);
 			});

@@ -6,13 +6,11 @@ import java.nio.file.Path;
 import java.util.List;
 
 import com.google.common.hash.HashCode;
-import net.devtech.oeel.impl.client.ObfSpriteAtlas;
 import net.devtech.oeel.v0.api.util.OEELEncrypting;
 import yeet.client.CubeData;
 import yeet.client.CubeModel;
 import yeet.client.TestModelProvider;
 
-import net.minecraft.client.render.model.ModelLoader;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.item.Item;
