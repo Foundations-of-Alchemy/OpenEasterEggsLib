@@ -6,6 +6,8 @@ import com.google.common.hash.HashCode;
 import net.devtech.oeel.v0.api.OEEL;
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.util.Identifier;
+
 public interface RecipeManager<T> {
 	/**
 	 * get the recipe for the given input.
@@ -17,21 +19,5 @@ public interface RecipeManager<T> {
 	 * this will prevent it the info from colliding with other recipes.
 	 */
 	@Nullable
-	T getForInput(HashCode input);
-	
-	Collection<T> getAll();
-
-	class Ref<T> implements RecipeManager<T> {
-		RecipeManager<T> manager;
-
-		@Override
-		public Collection<T> getAll() {
-			return this.manager.getAll();
-		}
-
-		@Override
-		public @Nullable T getForInput(HashCode input) {
-			return this.manager.getForInput(input);
-		}
-	}
+	T getForInput(HashCode input, Identifier itemHashFunction, Identifier blockHashFunction, Identifier entityHashFunction);
 }

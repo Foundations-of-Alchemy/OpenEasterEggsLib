@@ -6,12 +6,13 @@ import com.google.gson.Gson;
 import io.github.astrarre.itemview.v0.fabric.ItemKey;
 import net.devtech.oeel.impl.OEELInternal;
 import net.devtech.oeel.impl.hasher.BeaconHasher;
-import net.devtech.oeel.impl.resource.HashFunctionManager;
+import net.devtech.oeel.v0.api.data.HashFunctionManager;
 import net.devtech.oeel.impl.shaped.ObfuscatedCraftingRecipeBridge;
 import net.devtech.oeel.impl.shaped.ObfuscatedSmithingRecipeBridge;
 import net.devtech.oeel.impl.shaped.ObfuscatedStonecuttingRecipeBridge;
 import net.devtech.oeel.v0.api.access.DynamicHashFunction;
 import net.devtech.oeel.v0.api.data.ObfRecipeManager;
+import net.devtech.oeel.v0.api.data.ObfResourceManager;
 import net.devtech.oeel.v0.api.event.ServerResourceManagerLoadEvent;
 import net.devtech.oeel.v0.api.recipes.BaseObfuscatedRecipe;
 import net.devtech.oeel.v0.api.util.BlockData;
@@ -29,14 +30,14 @@ public final class OEEL implements ModInitializer {
 	public static final Registry<DynamicHashFunction<ItemKey>> ITEM_HASHER = FabricRegistryBuilder.createSimple((Class) DynamicHashFunction.class, new Identifier("oeel:item_hashers")).buildAndRegister();
 	public static final Registry<DynamicHashFunction<BlockData>> BLOCK_HASHER = FabricRegistryBuilder.createSimple((Class) DynamicHashFunction.class, new Identifier("oeel:block_hashers")).buildAndRegister();
 	public static final Registry<DynamicHashFunction<Entity>> ENTITY_HASHER = FabricRegistryBuilder.createSimple((Class) DynamicHashFunction.class, new Identifier("oeel:entity_hashers")).buildAndRegister();
-
 	/**
 	 *
 	 * It's a bit trickier to efficiently grab recipes from here because of the info substitutions.
 	 * An example implementation is provided at {@link ObfuscatedCraftingRecipeBridge#craft(boolean, Function)}.
 	 *
 	 */
-	public static final ObfRecipeManager.Ref<BaseObfuscatedRecipe> RECIPES = new ObfRecipeManager.Ref<>();
+	public static final ObfRecipeManager<BaseObfuscatedRecipe> RECIPES = new ObfRecipeManager<>(BaseObfuscatedRecipe.SERIALIZER);
+
 	public static final Identifier DEFAULT_HASHES = new Identifier("oeel:standard");
 
 	public static void init() {
@@ -64,9 +65,9 @@ public final class OEEL implements ModInitializer {
 			                                                   HashFunctionManager.ENTITY_HASH_FUNCTIONS,
 			                                                   Registry.ENTITY_TYPE_KEY,
 			                                                   Entity::getType, ENTITY_HASHER));
-
-			manager.registerReloader(new ObfRecipeManager<>(RECIPES, "obf_base", BaseObfuscatedRecipe.class));
-			manager.registerReloader(new ObfResourceManager());
+			ObfResourceManager resourceManager = new ObfResourceManager();
+			RECIPES.accept(resourceManager);
+			manager.registerReloader(resourceManager);
 		});
 	}
 

@@ -5,6 +5,7 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import com.google.common.hash.Hasher;
@@ -14,6 +15,7 @@ import net.devtech.oeel.impl.OEELInternal;
 import net.devtech.oeel.v0.api.EncryptionEntry;
 import net.devtech.oeel.v0.api.OEEL;
 import net.devtech.oeel.v0.api.access.HashFunction;
+import net.devtech.oeel.v0.api.data.HashFunctionManager;
 import net.devtech.oeel.v0.api.recipes.BaseObfuscatedRecipe;
 import net.devtech.oeel.v0.api.util.BiHasher;
 import net.devtech.oeel.v0.api.util.OEELEncrypting;
@@ -46,14 +48,15 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 	public static ItemStack craft(boolean testingForEmpty, Function<HashFunction<ItemKey>, EncryptionEntry> hash)
 			throws GeneralSecurityException, IOException {
 		// perhaps instead just iterate through all item info substitutions
-		for(HashFunction<ItemKey> function : OEEL.RECIPES.allItemFunctions()) {
+		for(Map.Entry<Identifier, HashFunction<ItemKey>> entry : HashFunctionManager.ITEM_HASH_FUNCTIONS.entrySet()) {
+			HashFunction<ItemKey> function = entry.getValue();
 			EncryptionEntry test = hash.apply(function);
-			BaseObfuscatedRecipe recipe = OEEL.RECIPES.getForInput(test.validation());
+			BaseObfuscatedRecipe recipe = OEEL.RECIPES.getForInput(test.validation(), entry.getKey(), null, null);
 			if(recipe != null) {
 				if(testingForEmpty) {
 					return STACK;
 				} else {
-					return OEELSerializing.deserializeItem(OEELEncrypting.decrypt(test.encryption(), recipe.encryptedOutput));
+					return OEELSerializing.deserializeItem(OEELEncrypting.decrypt(test.encryption(), recipe.getEncryptedOutput()));
 				}
 			}
 		}

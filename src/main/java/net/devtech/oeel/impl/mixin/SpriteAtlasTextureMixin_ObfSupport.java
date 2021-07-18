@@ -128,8 +128,6 @@ public abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture
 	@Nullable
 	protected abstract Sprite loadSprite(ResourceManager container, Sprite.Info info, int atlasWidth, int atlasHeight, int maxLevel, int x, int y);
 
-	@Shadow @Final private Identifier id;
-
 	private Sprite oeel_unencryptSprite(Identifier id, ObfTextures.ObfEntry entry) throws GeneralSecurityException, IOException {
 		HashCode encryptionKey = HashCode.fromString(id.getPath());
 		byte[] decryptedBytes = OEELEncrypting.decrypt(encryptionKey, entry.encryptedData());

@@ -1,4 +1,4 @@
-package net.devtech.oeel.impl.resource;
+package net.devtech.oeel.v0.api.data;
 
 import java.util.ArrayList;
 import java.util.Collection;

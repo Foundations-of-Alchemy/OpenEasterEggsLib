@@ -1,22 +1,16 @@
 package net.devtech.oeel.v0.api.recipes;
 
-import java.lang.reflect.Type;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 import com.google.common.hash.HashCode;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 import io.github.astrarre.itemview.v0.fabric.ItemKey;
-import io.github.astrarre.util.v0.api.Validate;
-import net.devtech.oeel.impl.resource.HashFunctionManager;
+import net.devtech.oeel.v0.api.data.HashFunctionManager;
+import net.devtech.oeel.v0.api.access.ByteDeserializer;
 import net.devtech.oeel.v0.api.access.HashFunction;
 import net.devtech.oeel.v0.api.util.BlockData;
-import net.devtech.oeel.v0.api.util.OEELEncrypting;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.entity.Entity;
@@ -26,43 +20,41 @@ import net.minecraft.util.Identifier;
  * A base obfuscated recipe
  */
 public class BaseObfuscatedRecipe {
-	public static final Serializer<BaseObfuscatedRecipe> SERIALIZER = new Serializer<>() {
-		@Override
-		protected BaseObfuscatedRecipe deserialize(JsonObject object,
-				HashCode inputHash,
-				byte[] encryptedOutput,
-				Identifier itemHashFunction,
-				Identifier entityHashFunction,
-				Identifier blockHashFunction) {
-			return new BaseObfuscatedRecipe(inputHash, encryptedOutput, itemHashFunction, entityHashFunction, blockHashFunction);
-		}
-	};
-
-	public final HashCode inputHash;
-	public final byte[] encryptedOutput;
-	@Nullable
-	public final Identifier itemHashFunction, entityHashFunction, blockHashFunction;
+	public static final ByteDeserializer<BaseObfuscatedRecipe> SERIALIZER = new Deserializer<>(BaseObfuscatedRecipe::new, "oeel/obf_r");
 	protected HashFunction<ItemKey> item;
 	protected HashFunction<Entity> entity;
 	protected HashFunction<BlockData> block;
+	private HashCode inputHash;
+	private byte[] encryptedOutput;
+	@Nullable private Identifier itemHashFunctionId;
+	@Nullable private Identifier entityHashFunctionId;
+	@Nullable private Identifier blockHashFunctionId;
 
-	public BaseObfuscatedRecipe(HashCode hash,
-			byte[] output,
-			@Nullable Identifier itemHashFunction,
-			@Nullable Identifier entityHashFunction,
-			@Nullable Identifier blockHashFunction) {
-		this.inputHash = hash;
-		this.encryptedOutput = output;
-		this.itemHashFunction = itemHashFunction;
-		this.entityHashFunction = entityHashFunction;
-		this.blockHashFunction = blockHashFunction;
+	protected BaseObfuscatedRecipe() {}
+
+	public BaseObfuscatedRecipe(HashCode inputHash,
+			byte[] encryptedOutput,
+			@Nullable Identifier itemHashFunctionId,
+			@Nullable Identifier entityHashFunctionId,
+			@Nullable Identifier blockHashFunctionId) {
+		this.inputHash = inputHash;
+		this.encryptedOutput = encryptedOutput;
+		this.itemHashFunctionId = itemHashFunctionId;
+		this.entityHashFunctionId = entityHashFunctionId;
+		this.blockHashFunctionId = blockHashFunctionId;
+	}
+
+	public boolean isValid(HashCode code, Identifier itemHasherId, Identifier blockHasherId, Identifier entityHasherId) {
+		return this.inputHash.equals(code) && Objects.equals(itemHasherId, this.itemHashFunctionId) && Objects.equals(entityHasherId, this.entityHashFunctionId) && Objects.equals(blockHasherId, this.blockHashFunctionId);
 	}
 
 	public HashFunction<ItemKey> getItemHashFunction() {
 		HashFunction<ItemKey> item = this.item;
 		if(item == null) {
-			Identifier id = this.itemHashFunction;
-			if(id == null) return null;
+			Identifier id = this.itemHashFunctionId;
+			if(id == null) {
+				return null;
+			}
 			this.item = item = HashFunctionManager.item(id);
 		}
 		return item;
@@ -71,8 +63,10 @@ public class BaseObfuscatedRecipe {
 	public HashFunction<Entity> getEntityHashFunction() {
 		HashFunction<Entity> entity = this.entity;
 		if(entity == null) {
-			Identifier id = this.entityHashFunction;
-			if(id == null) return null;
+			Identifier id = this.entityHashFunctionId;
+			if(id == null) {
+				return null;
+			}
 			this.entity = entity = HashFunctionManager.entity(id);
 		}
 		return entity;
@@ -81,43 +75,68 @@ public class BaseObfuscatedRecipe {
 	public HashFunction<BlockData> getBlockHashFunction() {
 		HashFunction<BlockData> block = this.block;
 		if(block == null) {
-			Identifier id = this.blockHashFunction;
-			if(id == null) return null;
+			Identifier id = this.blockHashFunctionId;
+			if(id == null) {
+				return null;
+			}
 			this.block = block = HashFunctionManager.block(id);
 		}
 		return block;
 	}
 
-	public static abstract class Serializer<T extends BaseObfuscatedRecipe> implements JsonSerializer<T>, JsonDeserializer<T> {
-		@Override
-		public JsonElement serialize(T src, Type typeOfSrc, JsonSerializationContext context) {
-			JsonObject object = new JsonObject();
-			object.addProperty("input", src.inputHash.toString());
-			object.addProperty("output", OEELEncrypting.encodeBase16(src.encryptedOutput));
-			return object;
+	public HashCode getInputHash() {
+		return this.inputHash;
+	}
+
+	public byte[] getEncryptedOutput() {
+		return this.encryptedOutput;
+	}
+
+	private static class Deserializer<T extends BaseObfuscatedRecipe> implements ByteDeserializer<T> {
+		public final Supplier<T> newInstance;
+		public final String magic;
+
+		private Deserializer(Supplier<T> instance, String magic) {
+			this.newInstance = instance;
+			this.magic = magic;
 		}
 
 		@Override
-		public T deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-			JsonObject object = json.getAsJsonObject();
-			String inputHashString = Validate.notNull(object.getAsJsonPrimitive("input"), "recipe must have input!").getAsString();
-			String encryptedOutputString = Validate.notNull(object.getAsJsonPrimitive("output"), "recipe must have output!").getAsString();
-			String itemHashFunc = Validate.transform(object.getAsJsonPrimitive("item"), JsonPrimitive::getAsString);
-			String entityHashFunc = Validate.transform(object.getAsJsonPrimitive("entity"), JsonPrimitive::getAsString);
-			String blockHashFunc = Validate.transform(object.getAsJsonPrimitive("block"), JsonPrimitive::getAsString);
-			return this.deserialize(object,
-			                        HashCode.fromString(inputHashString),
-			                        OEELEncrypting.decodeBase16(encryptedOutputString),
-			                        Validate.transform(itemHashFunc, Identifier::new),
-			                        Validate.transform(entityHashFunc, Identifier::new),
-			                        Validate.transform(blockHashFunc, Identifier::new));
+		public String magic() {
+			return this.magic;
 		}
 
-		protected abstract T deserialize(JsonObject object,
-				HashCode inputHash,
-				byte[] encryptedOutput,
-				Identifier itemHashFunction,
-				Identifier entityHashFunction,
-				Identifier blockHashFunction);
+		@Override
+		public T newInstance() {
+			return this.newInstance.get();
+		}
+
+		@Override
+		public void read(BaseObfuscatedRecipe instance, ByteBuffer buffer, HashCode inputHash) {
+			instance.inputHash = inputHash;
+			byte[] encryptedOutput = new byte[buffer.getInt()];
+			buffer.get(encryptedOutput);
+			instance.encryptedOutput = encryptedOutput;
+			instance.itemHashFunctionId = readIdentifier(buffer);
+			instance.blockHashFunctionId = readIdentifier(buffer);
+			instance.entityHashFunctionId = readIdentifier(buffer);
+		}
+	}
+
+	public static Identifier readIdentifier(ByteBuffer buffer) {
+		int len = buffer.getInt();
+		if(len == 0) {
+			return null;
+		}
+		int currentLimit = buffer.limit();
+		int endPos = buffer.position() + len;
+		try {
+			buffer.limit(len);
+			String decoded = StandardCharsets.US_ASCII.decode(buffer).toString();
+			return new Identifier(decoded);
+		} finally {
+			buffer.limit(currentLimit);
+			buffer.position(endPos);
+		}
 	}
 }

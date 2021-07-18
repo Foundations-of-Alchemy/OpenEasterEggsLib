@@ -35,6 +35,8 @@ import net.minecraft.util.registry.Registry;
 
 public class OEELHashing {
 	public static final HashFunction FUNCTION = Hashing.sha256();
+	public static final int BITS = FUNCTION.bits();
+
 	public static final String ALGORITHM = "AES";
 	/**
 	 * if true, unrecognized NbtElement subclasses can be hashed via a default implementation
