@@ -1,6 +1,9 @@
 package net.devtech.oeel.impl.mixin;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.List;
@@ -10,10 +13,11 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import com.google.common.hash.HashCode;
-import com.mojang.datafixers.util.Pair;
 import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.impl.client.ObfTextures;
 import net.devtech.oeel.impl.client.ResourceManagerHack;
+import net.devtech.oeel.v0.api.data.ObfResourceManager;
+import net.devtech.oeel.v0.api.util.HashId;
 import net.devtech.oeel.v0.api.util.OEELEncrypting;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -32,15 +36,14 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.texture.TextureStitcher;
 import net.minecraft.client.texture.TextureTickListener;
-import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
 
 @Mixin(SpriteAtlasTexture.class)
 public abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture {
-	final Map<String, ObfTextures.ObfEntry> oeel_encryptedSprites = new HashMap<>();
-	final Map<Sprite.Info, Pair<String, byte[]>> oeel_encryptedSpriteData = new HashMap<>();
+	final Map<Sprite.Info, ObfTextures.Key> oeel_encryptedSpriteData = new HashMap<>();
+	final Map<Identifier, ObfTextures.AtlasSpace> oeel_atlasSpace = new HashMap<>();
 	int mipmapLevel;
 
 	@Shadow @Final private List<TextureTickListener> animatedSprites;
@@ -56,32 +59,14 @@ public abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture
 			Set<Identifier> set,
 			int i,
 			TextureStitcher stitcher,
-			int mimapLevel) {
+			int mimapLevel) throws IOException {
 		this.mipmapLevel = mipmapLevel;
-		this.oeel_encryptedSprites.clear();
 		this.oeel_encryptedSpriteData.clear();
-
-		// todo fix paths, maybe, idk, perhaps
-		for(Identifier sprite : manager.findResources("obf_sprite", s -> s.endsWith(".data"))) {
-			try(Resource resource = manager.getResource(sprite)) {
-				ObfTextures.Meta obfMeta = resource.getMetadata(ObfTextures.META_READER);
-				if(obfMeta == null) {
-					throw new IllegalStateException("\"obf\" entry must exist with x, y & info! " + sprite);
-				}
-
-				AnimationResourceMetadata animMeta = resource.getMetadata(AnimationResourceMetadata.READER);
-				if(animMeta == null) {
-					animMeta = AnimationResourceMetadata.EMPTY;
-				}
-
-				Pair<Integer, Integer> pair = animMeta.ensureImageSize(obfMeta.width, obfMeta.height);
-				Sprite.Info info = new Sprite.Info(sprite, pair.getFirst(), pair.getSecond(), animMeta);
-				stitcher.add(info);
-				byte[] bytes = resource.getInputStream().readAllBytes();
-				this.oeel_encryptedSpriteData.put(info, Pair.of(obfMeta.name, bytes));
-			} catch(IOException e) {
-				e.printStackTrace();
-			}
+		for(ObfTextures.Key meta : ObfTextures.getMetas(manager)) {
+			ObfTextures.AtlasMeta atlasMeta = meta.meta().get(this.id.toString());
+			Sprite.Info info = new Sprite.Info(meta.id(), atlasMeta.atlasWidth, atlasMeta.atlasHeight, AnimationResourceMetadata.EMPTY);
+			this.oeel_encryptedSpriteData.put(info, meta);
+			stitcher.add(info);
 		}
 	}
 
@@ -100,10 +85,10 @@ public abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture
 			int x,
 			int y,
 			CallbackInfo ci) {
-		Pair<String, byte[]> pair = this.oeel_encryptedSpriteData.get(info);
-		if(pair != null) {
-			var val = new ObfTextures.ObfEntry(info, atlasWidth, atlasHeight, x, y, this.mipmapLevel, pair.getSecond());
-			this.oeel_encryptedSprites.put(pair.getFirst(), val);
+		ObfTextures.Key atlasMeta = this.oeel_encryptedSpriteData.remove(info);
+		if(atlasMeta != null) {
+			var val = new ObfTextures.AtlasSpace(info, atlasWidth, atlasHeight, x, y, this.mipmapLevel);
+			this.oeel_atlasSpace.put(atlasMeta.id(), val);
 			ci.cancel();
 		}
 	}
@@ -111,29 +96,41 @@ public abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture
 
 	@Redirect(method = "getSprite", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;"))
 	public Object getObfSprite(Map map, Object key, Identifier spriteId) {
+		outer:
 		try {
-			HashCode code = HashCode.fromString(spriteId.getNamespace());
-			ObfTextures.ObfEntry entry = this.oeel_encryptedSprites.remove(code);
-			Sprite sprite = this.oeel_unencryptSprite(spriteId, entry);
+			String path = spriteId.getPath();
+			int atlasIndex = path.indexOf("/oeel/");
+			if(atlasIndex == -1) break outer;
+			Identifier atlasId = new Identifier(spriteId.getNamespace(), path.substring(0, atlasIndex));
+			ObfTextures.AtlasSpace space = this.oeel_atlasSpace.get(atlasId);
+			HashId id = HashId.getKey(spriteId);
+			if(id == null) break outer;
+			Sprite sprite = this.oeel_unencryptSprite(id.a, id.b, space);
 			map.put(spriteId, sprite);
 			return sprite;
 		} catch(IllegalArgumentException | NullPointerException e) {
-			return map.get(key);
 		} catch(GeneralSecurityException | IOException e) {
 			throw Validate.rethrow(e);
 		}
+
+		return map.get(key);
 	}
 
 	@Shadow
 	@Nullable
 	protected abstract Sprite loadSprite(ResourceManager container, Sprite.Info info, int atlasWidth, int atlasHeight, int maxLevel, int x, int y);
 
-	private Sprite oeel_unencryptSprite(Identifier id, ObfTextures.ObfEntry entry) throws GeneralSecurityException, IOException {
-		HashCode encryptionKey = HashCode.fromString(id.getPath());
-		byte[] decryptedBytes = OEELEncrypting.decrypt(encryptionKey, entry.encryptedData());
-		var hack = new ResourceManagerHack(decryptedBytes);
+	@Shadow @Final private Identifier id;
+
+	private Sprite oeel_unencryptSprite(HashCode validationKey, HashCode encryptionKey, ObfTextures.AtlasSpace space) throws GeneralSecurityException, IOException {
+		byte[] decrypt = ObfResourceManager.client.decryptOnce(validationKey, b -> true, encryptionKey);
+		InputStream stream = new ByteArrayInputStream(decrypt);
+		DataInputStream data = new DataInputStream(stream);
+		int offsetX = data.readInt(), offsetY = data.readInt();
+
+		var hack = new ResourceManagerHack(stream);
 		this.bindTexture();
-		Sprite sprite = this.loadSprite(hack, entry.info(), entry.atlasWidth(), entry.atlasHeight(), entry.maxLevel(), entry.x(), entry.y());
+		Sprite sprite = this.loadSprite(hack, space.info(), space.atlasWidth(), space.atlasHeight(), space.maxLevel(), space.x() + offsetX, space.y() + offsetY);
 		sprite.upload();
 		TextureTickListener textureTickListener = sprite.getAnimation();
 		if(textureTickListener != null) {

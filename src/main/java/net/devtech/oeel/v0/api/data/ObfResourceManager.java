@@ -30,7 +30,13 @@ import net.minecraft.resource.SinglePreparationResourceReloader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
 public class ObfResourceManager extends SinglePreparationResourceReloader<Multimap<HashCode, byte[]>> {
+	@Environment(EnvType.CLIENT)
+	public static ObfResourceManager client;
+
 	private Multimap<HashCode, byte[]> encryptedData;
 
 	public ObfResourceManager() {

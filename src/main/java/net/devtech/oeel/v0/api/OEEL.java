@@ -17,12 +17,16 @@ import net.devtech.oeel.v0.api.event.ServerResourceManagerLoadEvent;
 import net.devtech.oeel.v0.api.recipes.BaseObfuscatedRecipe;
 import net.devtech.oeel.v0.api.util.BlockData;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
+import net.minecraft.resource.ReloadableResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
+import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
+import net.fabricmc.loader.api.FabricLoader;
 
 @SuppressWarnings("unchecked")
 public final class OEEL implements ModInitializer {
@@ -69,6 +73,12 @@ public final class OEEL implements ModInitializer {
 			RECIPES.accept(resourceManager);
 			manager.registerReloader(resourceManager);
 		});
+		if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+			ReloadableResourceManager manager = (ReloadableResourceManager) MinecraftClient.getInstance().getResourceManager();
+			ObfResourceManager resourceManager = new ObfResourceManager();
+			manager.registerReloader(resourceManager);
+			ObfResourceManager.client = resourceManager;
+		}
 	}
 
 	@Override

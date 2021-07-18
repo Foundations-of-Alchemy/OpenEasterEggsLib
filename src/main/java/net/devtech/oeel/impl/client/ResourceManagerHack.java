@@ -18,7 +18,7 @@ import net.minecraft.resource.ResourcePack;
 import net.minecraft.resource.metadata.ResourceMetadataReader;
 import net.minecraft.util.Identifier;
 
-public record ResourceManagerHack(byte[] data) implements ResourceManager {
+public record ResourceManagerHack(InputStream data) implements ResourceManager {
 	@Override public Set<String> getAllNamespaces() {return Collections.emptySet();}
 	@Override public boolean containsResource(Identifier id) {return false;}
 	@Override public List<Resource> getAllResources(Identifier id) {return null;}
@@ -26,9 +26,9 @@ public record ResourceManagerHack(byte[] data) implements ResourceManager {
 	@Override public Stream<ResourcePack> streamResourcePacks() {return null;}
 	@Override public Resource getResource(Identifier id) {return new ResourceHack(this.data);}
 
-	public record ResourceHack(byte[] data) implements Resource {
+	public record ResourceHack(InputStream data) implements Resource {
 		@Override public Identifier getId() {return null;}
-		@Override public InputStream getInputStream() {return new ByteArrayInputStream(this.data);}
+		@Override public InputStream getInputStream() {return this.data;}
 		@Override public boolean hasMetadata() {return false;}
 		@Nullable @Override public <T> T getMetadata(ResourceMetadataReader<T> metaReader) {return null;}
 		@Override public String getResourcePackName() {return null;}
