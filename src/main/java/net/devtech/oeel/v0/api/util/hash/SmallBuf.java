@@ -1,0 +1,21 @@
+package net.devtech.oeel.v0.api.util.hash;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
+public final class SmallBuf {
+	static final SmallBuf COPY = new SmallBuf();
+	public final byte[] buffer = new byte[4096];
+	public final AtomicInteger reserve = new AtomicInteger();
+
+	public int getSection() {
+		return this.reserve.getAndAdd(64) & 0xfff;
+	}
+
+	public static long getLong(byte[] buf, int off) {
+		long current = 0;
+		for(int i = 0; i < 8; i++) {
+			current |= (buf[i + off] & 0xFFL) << (56 - i * 8);
+		}
+		return current;
+	}
+}

@@ -1,10 +1,8 @@
 package net.devtech.oeel.v0.api.util;
 
 import com.google.common.hash.HashCode;
-import com.sun.jna.platform.win32.OaIdl;
 
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
 
 public class HashId extends Identifier {
 	public final HashCode a, b;

@@ -46,7 +46,7 @@ public class OEELEncrypting {
 		return new String(hexChars, StandardCharsets.UTF_8);
 	}
 
-	public static byte[] decrypt(HashCode key, byte[] data) throws GeneralSecurityException, IOException {
+	public static byte[] decrypt(HashCode key, byte[] data) throws GeneralSecurityException {
 		byte[] keyBytes = new byte[16];
 		key.writeBytesTo(keyBytes, 0, keyBytes.length);
 		return OEELInternal.crypt(keyBytes, data, Cipher.DECRYPT_MODE);

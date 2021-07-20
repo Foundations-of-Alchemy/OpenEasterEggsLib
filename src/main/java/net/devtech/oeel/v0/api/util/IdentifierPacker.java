@@ -39,10 +39,10 @@ public final class IdentifierPacker {
 		char max = 0, current = 0;
 		max = load('_', current++, toId, toChar, validChars, max);
 		max = load('-', current++, toId, toChar, validChars, max);
-		for(char i = 'a'; i <= 'z'; i++) {
+		for(char i = 'a'; i <= 'z'; i++) { // 26
 			max = load(i, current++, toId, toChar, validChars, max);
 		}
-		for(char i = '0'; i <= '9'; i++) {
+		for(char i = '0'; i <= '9'; i++) { // 10
 			max = load(i, current++, toId, toChar, validChars, max);
 		}
 
@@ -99,5 +99,13 @@ public final class IdentifierPacker {
 			buf[i] = (char) ID_TO_CHAR[(int) (CHAR_MASK & shifted)];
 		}
 		return new String(buf);
+	}
+
+	public static int getId(char c) {
+		return CHAR_TO_ID[c];
+	}
+
+	public static char getId(int i) {
+		return (char) ID_TO_CHAR[i];
 	}
 }

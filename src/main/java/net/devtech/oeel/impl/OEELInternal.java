@@ -27,6 +27,7 @@ import net.minecraft.util.Identifier;
 public class OEELInternal {
 	public static final String MODID = "oeel";
 	public static final byte[] HEX_ARRAY = "0123456789abcdef".getBytes(StandardCharsets.US_ASCII);
+	public static final char[] HEX_ARRAY_C = "0123456789abcdef".toCharArray();
 
 	public static Identifier id(String path) {
 		return new Identifier(MODID, path);
