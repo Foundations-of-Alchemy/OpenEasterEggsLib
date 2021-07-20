@@ -21,4 +21,10 @@ public final class SmallBuf {
 		}
 		return current;
 	}
+
+	public static void writeLong(long l, byte[] buf, int off) {
+		for(int i = 0; i < 8; i++) {
+			buf[off + i] = (byte) (l >>> (56 - i * 8));
+		}
+	}
 }

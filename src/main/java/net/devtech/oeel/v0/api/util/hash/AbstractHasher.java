@@ -160,6 +160,7 @@ public abstract class AbstractHasher implements Hasher {
 		while(encoder.encode(buffer, this.buf, true) == CoderResult.OVERFLOW) {
 			this.hash();
 		}
+		this.hash();
 		return this;
 	}
 

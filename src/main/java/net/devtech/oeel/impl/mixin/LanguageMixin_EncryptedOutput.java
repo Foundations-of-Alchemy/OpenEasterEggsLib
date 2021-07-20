@@ -33,7 +33,7 @@ public abstract class LanguageMixin_EncryptedOutput extends Language {
 				return null;
 			}
 
-			String langKey = key.substring(0, index); // the key in the en_us.json file
+			String langKey = key.substring(0, index); // the encryptionKey in the en_us.json file
 			byte[] decrypt = OEELEncrypting.decodeBase16(key, index + 1, key.length());
 
 			String encryptedOutput = langGetter.apply(langKey);

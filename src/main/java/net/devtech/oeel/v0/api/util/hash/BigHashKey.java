@@ -118,6 +118,18 @@ public class BigHashKey extends FixedBuffer<BigHashKey> {
 	}
 
 	@Override
+	public void write(byte[] buf, int off) {
+		SmallBuf.writeLong(this.a, buf, off);
+		SmallBuf.writeLong(this.b, buf, off + 8);
+		SmallBuf.writeLong(this.c, buf, off + 16);
+		SmallBuf.writeLong(this.d, buf, off + 24);
+		SmallBuf.writeLong(this.a, buf, off + 32);
+		SmallBuf.writeLong(this.b, buf, off + 40);
+		SmallBuf.writeLong(this.c, buf, off + 48);
+		SmallBuf.writeLong(this.d, buf, off + 56);
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		return this == o || o instanceof BigHashKey h && this.compareTo(h) == 0;
 	}

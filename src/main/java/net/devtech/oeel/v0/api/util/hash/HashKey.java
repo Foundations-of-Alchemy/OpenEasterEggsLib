@@ -1,7 +1,10 @@
 package net.devtech.oeel.v0.api.util.hash;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.security.DigestException;
 import java.security.MessageDigest;
 
@@ -21,12 +24,16 @@ public final class HashKey extends FixedBuffer<HashKey> {
 		this.d = d;
 	}
 
+	public HashKey(CharSequence base16) {
+		this(base16, 0);
+	}
+
 	public HashKey(CharSequence base16, int off) {
 		int index = off;
-		this.a = Long.parseLong(base16, index += 16, index, 16);
-		this.b = Long.parseLong(base16, index += 16, index, 16);
-		this.c = Long.parseLong(base16, index += 16, index, 16);
-		this.d = Long.parseLong(base16, index += 16, index, 16);
+		this.a = Long.parseLong(base16, index, index += 16, 16);
+		this.b = Long.parseLong(base16, index, index += 16, 16);
+		this.c = Long.parseLong(base16, index, index += 16, 16);
+		this.d = Long.parseLong(base16, index, index + 16, 16);
 	}
 
 	public HashKey(MessageDigest digest) {
@@ -78,20 +85,43 @@ public final class HashKey extends FixedBuffer<HashKey> {
 	}
 
 	@Override
+	public void write(byte[] buf, int off) {
+		SmallBuf.writeLong(this.a, buf, off);
+		SmallBuf.writeLong(this.b, buf, off + 8);
+		SmallBuf.writeLong(this.c, buf, off + 16);
+		SmallBuf.writeLong(this.d, buf, off + 24);
+	}
+
+	public void write(ByteBuffer buffer) {
+		buffer.putLong(this.a);
+		buffer.putLong(this.b);
+		buffer.putLong(this.c);
+		buffer.putLong(this.d);
+	}
+
+	public long getLong(int index) {
+		return switch(index) {
+			case 0 -> this.a;
+			case 1 -> this.b;
+			case 2 -> this.c;
+			case 3 -> this.d;
+			default -> throw new ArrayIndexOutOfBoundsException(index + " > 4");
+		};
+	}
+
+	public int longSize() {
+		return 4;
+	}
+
+	@Override
 	public byte getByte(int index) {
 		int modIndex = 56 - (index & 7) * 8;
-		return switch(index >> 6) {
-			case 0 -> (byte) (this.a >> modIndex & 0xff);
-			case 1 -> (byte) (this.b >> modIndex & 0xff);
-			case 2 -> (byte) (this.c >> modIndex & 0xff);
-			case 3 -> (byte) (this.d >> modIndex & 0xff);
-			default -> (byte) 0;
-		};
+		return (byte) (this.getLong(index >> 6) >> modIndex & 0xff);
 	}
 
 	@Override
 	public int bytes() {
-		return 32;
+		return BYTES;
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package net.devtech.oeel.v0.api.recipes;
 
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -7,6 +9,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 import io.github.astrarre.itemview.v0.fabric.ItemKey;
+import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.v0.api.access.ByteDeserializer;
 import net.devtech.oeel.v0.api.access.HashFunction;
 import net.devtech.oeel.v0.api.data.HashFunctionManager;
@@ -92,38 +95,28 @@ public class BaseObfuscatedRecipe {
 		return this.output;
 	}
 
-	public static Identifier readIdentifier(ByteBuffer buffer) {
-		long packedName = buffer.getLong();
+	public static Identifier readIdentifier(DataInputStream buffer) throws IOException {
+		long packedName = buffer.readLong();
 		if(packedName == 0) {
 			return null;
 		}
-		long packedPath = buffer.getLong();
+		long packedPath = buffer.readLong();
 		String name, path;
 		if(packedName != -1) {
 			name = IdentifierPacker.unpack(packedName);
 		} else {
-			name = readString(buffer, StandardCharsets.US_ASCII);
+			name = buffer.readUTF();
 		}
 
 		if(packedPath != -1) {
 			path = IdentifierPacker.unpack(packedPath);
 		} else {
-			path = readString(buffer, StandardCharsets.US_ASCII);
+			path = buffer.readUTF();
 		}
 
 		return new Identifier(name, path);
 	}
 
-	public static String readString(ByteBuffer buffer, Charset charset) {
-		int len = buffer.getInt(), currentLimit = buffer.limit(), endPos = buffer.position() + len;
-		try {
-			buffer.limit(len);
-			return charset.decode(buffer).toString();
-		} finally {
-			buffer.limit(currentLimit);
-			buffer.position(endPos);
-		}
-	}
 
 	private static class Deserializer<T extends BaseObfuscatedRecipe> implements ByteDeserializer<T> {
 		public final Supplier<T> newInstance;
@@ -145,13 +138,11 @@ public class BaseObfuscatedRecipe {
 		}
 
 		@Override
-		public void read(BaseObfuscatedRecipe instance, ByteBuffer buffer, HashKey inputHash) {
-			byte[] output = new byte[buffer.getInt()];
-			buffer.get(output);
-			instance.output = output;
+		public void read(BaseObfuscatedRecipe instance, DataInputStream buffer, HashKey inputHash) throws IOException {
 			instance.itemHashFunctionId = readIdentifier(buffer);
 			instance.blockHashFunctionId = readIdentifier(buffer);
 			instance.entityHashFunctionId = readIdentifier(buffer);
+			instance.output = buffer.readNBytes(buffer.readInt());
 		}
 	}
 }

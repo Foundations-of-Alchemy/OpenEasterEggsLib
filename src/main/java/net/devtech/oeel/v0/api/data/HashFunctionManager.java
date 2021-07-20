@@ -99,7 +99,7 @@ public class HashFunctionManager<T, E> extends MultiJsonDataLoader<JsonElement> 
 		} else if(key.indexOf(':') != -1) {
 			return this.registry(key, value);
 		} else {
-			throw new UnsupportedOperationException("unknown key " + key);
+			throw new UnsupportedOperationException("unknown encryptionKey " + key);
 		}
 	}
 
@@ -120,7 +120,8 @@ public class HashFunctionManager<T, E> extends MultiJsonDataLoader<JsonElement> 
 	protected HashFunction<T> tag(String key, JsonElement value) {
 		TagManager manager = ServerTagManagerHolder.getTagManager();
 		Tag<E> tag = manager.getTag(this.registry, new Identifier(key), null);
-		byte[] replacement = OEELEncrypting.decodeBase16(value.getAsString());
+		String val = value.getAsString();
+		byte[] replacement = OEELEncrypting.decodeBase16(val, 0, val.length());
 		return (i, k) -> {
 			if(tag.contains(this.getter.apply(k))) {
 				i.putBytes(replacement);
@@ -130,20 +131,22 @@ public class HashFunctionManager<T, E> extends MultiJsonDataLoader<JsonElement> 
 
 	protected HashFunction<T> registry(String key, JsonElement value) {
 		E item = (E) Registry.REGISTRIES.getOrThrow((RegistryKey) this.registry).get(new Identifier(key));
-		byte[] replacement = OEELEncrypting.decodeBase16(value.getAsString());
-		return (incoming, val) -> {
-			if(this.getter.apply(val) == item) {
-				incoming.putBytes(replacement);
+		String val = value.getAsString();
+		byte[] replacement = OEELEncrypting.decodeBase16(val, 0, val.length());
+		return (i, k) -> {
+			if(this.getter.apply(k) == item) {
+				i.putBytes(replacement);
 			}
 		};
 	}
 
 	protected HashFunction<T> hasher(String key, JsonElement value) {
 		E item = (E) Registry.REGISTRIES.getOrThrow((RegistryKey) this.registry).get(new Identifier(key));
-		byte[] replacement = OEELEncrypting.decodeBase16(value.getAsString());
-		return (incoming, val) -> {
-			if(this.getter.apply(val) == item) {
-				incoming.putBytes(replacement);
+		String val = value.getAsString();
+		byte[] replacement = OEELEncrypting.decodeBase16(val, 0, val.length());
+		return (i, k) -> {
+			if(this.getter.apply(k) == item) {
+				i.putBytes(replacement);
 			}
 		};
 	}

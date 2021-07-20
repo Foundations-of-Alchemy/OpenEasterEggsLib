@@ -11,7 +11,7 @@ import java.util.function.Function;
 import io.github.astrarre.itemview.v0.fabric.ItemKey;
 import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.impl.OEELInternal;
-import net.devtech.oeel.v0.api.EncryptionEntry;
+import net.devtech.oeel.v0.api.util.EncryptionEntry;
 import net.devtech.oeel.v0.api.OEEL;
 import net.devtech.oeel.v0.api.access.HashFunction;
 import net.devtech.oeel.v0.api.data.HashFunctionManager;
@@ -50,7 +50,7 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 		for(Map.Entry<Identifier, HashFunction<ItemKey>> entry : HashFunctionManager.ITEM_HASH_FUNCTIONS.entrySet()) {
 			HashFunction<ItemKey> function = entry.getValue();
 			EncryptionEntry test = hash.apply(function);
-			BaseObfuscatedRecipe recipe = OEEL.RECIPES.getForInput(test.validation(), test.key(), entry.getKey(), null, null);
+			BaseObfuscatedRecipe recipe = OEEL.RECIPES.getForInput(test.entryKey(), test.encryptionKey(), entry.getKey(), null, null);
 			if(recipe != null) {
 				if(testingForEmpty) {
 					return STACK;
@@ -95,7 +95,7 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 	/**
 	 * Hashes a crafting matrix, this is how shaped recipes are implemented
 	 *
-	 * @param testingForEmpty if true {@link EncryptionEntry#key()} is null
+	 * @param testingForEmpty if true {@link EncryptionEntry#encryptionKey()} is null
 	 */
 	public static EncryptionEntry hashMatrix(Identifier id,
 			HashFunction<ItemKey> hashFunction,

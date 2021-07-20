@@ -37,11 +37,6 @@ public class A implements ModInitializer {
 		return new Identifier("testmod", name);
 	}
 
-	public static void main(String[] args) throws IOException {
-		byte[] inputPng = Files.readAllBytes(Path.of("src/testmod/resources/assets/testmod/obf_sprite/test_texture_1.png"));
-		HashCode encryptionKey = HashCode.fromLong(0xDEADBEEF_CAFEBABEL);
-		byte[] encrytedPng = OEELEncrypting.encrypt(encryptionKey, inputPng);
-		Files.write(Path.of("src/testmod/resources/assets/testmod/obf_sprite/test_texture_1.data"), encrytedPng);
-		System.out.println(encryptionKey);
+	public static void main(String[] args) {
 	}
 }

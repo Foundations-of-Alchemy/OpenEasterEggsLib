@@ -13,7 +13,7 @@ import org.apache.commons.io.output.NullOutputStream;
 public class SHA256Hasher extends AbstractHasher implements AutoCloseable {
 	static final OutputStream NULL = NullOutputStream.NULL_OUTPUT_STREAM;
 	static final AtomicInteger INDEX = new AtomicInteger();
-	static final AtomicReferenceArray<SHA256Hasher> POOL = new AtomicReferenceArray<>(256);
+	static final AtomicReferenceArray<SHA256Hasher> POOL = new AtomicReferenceArray<>(128);
 
 	static final MessageDigest SHA_256;
 
@@ -48,6 +48,10 @@ public class SHA256Hasher extends AbstractHasher implements AutoCloseable {
 		}
 	}
 
+	public SHA256Hasher() {
+		this(-1);
+	}
+
 	public static SHA256Hasher getPooled() {
 		int index = INDEX.incrementAndGet() & 255;
 		SHA256Hasher hasher = POOL.getAndSet(index, null);
@@ -55,6 +59,27 @@ public class SHA256Hasher extends AbstractHasher implements AutoCloseable {
 			return new SHA256Hasher(index);
 		} else {
 			return hasher;
+		}
+	}
+
+	/**
+	 * resets this instance once called, so it can be re-used
+	 */
+	public HashKey hashCompact() {
+		return new HashKey(this.digest);
+	}
+
+	public byte[] hash() {
+		return this.digest.digest();
+	}
+
+	/**
+	 * returns the object to the pool
+	 */
+	@Override
+	public void close() {
+		if(this.index != -1) {
+			POOL.set(this.index, this);
 		}
 	}
 
@@ -75,24 +100,5 @@ public class SHA256Hasher extends AbstractHasher implements AutoCloseable {
 			this.stream = stream = new DigestOutputStream(NULL, this.digest);
 		}
 		return stream;
-	}
-
-	/**
-	 * resets this instance once called, so it can be re-used
-	 */
-	public HashKey hashCompact() {
-		return new HashKey(this.digest);
-	}
-
-	public byte[] hash() {
-		return this.digest.digest();
-	}
-
-	/**
-	 * returns the object to the pool
-	 */
-	@Override
-	public void close() {
-		POOL.set(this.index, this);
 	}
 }

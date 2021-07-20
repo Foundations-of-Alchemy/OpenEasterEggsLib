@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
-import net.devtech.oeel.v0.api.EncryptionEntry;
+import net.devtech.oeel.v0.api.util.EncryptionEntry;
 
 public class BiHasher extends AbstractHasher implements Closeable {
 	private static final byte[] MAGIC = ByteBuffer.allocate(8).putLong(0xDEAD_BEEF_CAFE_BABEL).array();

@@ -3,7 +3,6 @@ package net.devtech.oeel.v0.api.data;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.Iterator;
@@ -15,6 +14,8 @@ import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.v0.api.access.ByteDeserializer;
 import net.devtech.oeel.v0.api.util.IdentifierPacker;
 import net.devtech.oeel.v0.api.util.OEELEncrypting;
+import net.devtech.oeel.v0.api.util.func.UFunc;
+import net.devtech.oeel.v0.api.util.func.UPred;
 import net.devtech.oeel.v0.api.util.hash.HashKey;
 
 import net.minecraft.resource.Resource;
@@ -56,14 +57,13 @@ public class ObfResourceManager extends SinglePreparationResourceReloader<Multim
 		long magic = IdentifierPacker.pack(deserializer.magic());
 		return () -> this.encryptedData.get(validationKey)
 				             .stream()
-				             .map(b -> OEELEncrypting.decrypt(b, key)) // decrypt
-				             .map(ByteBuffer::wrap)
-				             .filter(buf -> buf.getLong() == magic) // validate magic
-				             .map(i -> {
+				             .map(b -> OEELEncrypting.decryptStream(b, key)) // decrypt
+				             .filter(UPred.of(s -> s.readLong() == magic)) // validate magic
+				             .map(UFunc.of(i -> {
 					             T value = deserializer.newInstance();
 					             deserializer.read(value, i, validationKey);
 					             return value;
-				             })
+				             }))
 				             .iterator();
 	}
 

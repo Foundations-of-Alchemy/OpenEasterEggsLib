@@ -2,7 +2,6 @@ package net.devtech.oeel.v0.api;
 
 import java.util.function.Function;
 
-import com.google.gson.Gson;
 import io.github.astrarre.itemview.v0.fabric.ItemKey;
 import net.devtech.oeel.impl.OEELInternal;
 import net.devtech.oeel.impl.hasher.BeaconHasher;
@@ -30,7 +29,6 @@ import net.fabricmc.loader.api.FabricLoader;
 
 @SuppressWarnings("unchecked")
 public final class OEEL implements ModInitializer {
-	public static final Gson GSON = new Gson();
 	public static final Registry<DynamicHashFunction<ItemKey>> ITEM_HASHER = FabricRegistryBuilder.createSimple((Class) DynamicHashFunction.class, new Identifier("oeel:item_hashers")).buildAndRegister();
 	public static final Registry<DynamicHashFunction<BlockData>> BLOCK_HASHER = FabricRegistryBuilder.createSimple((Class) DynamicHashFunction.class, new Identifier("oeel:block_hashers")).buildAndRegister();
 	public static final Registry<DynamicHashFunction<Entity>> ENTITY_HASHER = FabricRegistryBuilder.createSimple((Class) DynamicHashFunction.class, new Identifier("oeel:entity_hashers")).buildAndRegister();
@@ -52,7 +50,7 @@ public final class OEEL implements ModInitializer {
 			return OEELInternal.LANG_STARTER + hasher.hashA() + "." + hasher.hashB();
 		});*/
 
-		Registry.register(BLOCK_HASHER, new Identifier("oeel:beacon_hasher"), element -> new BeaconHasher(GSON.fromJson(element, String[].class)));
+		Registry.register(BLOCK_HASHER, new Identifier("oeel:beacon_hasher"), element -> new BeaconHasher(OEELInternal.GSON.fromJson(element, String[].class)));
 		Registry.register(Registry.RECIPE_SERIALIZER, OEELInternal.id("obf_crafting"), ObfuscatedCraftingRecipeBridge.SERIALIZER);
 		Registry.register(Registry.RECIPE_SERIALIZER, ObfuscatedStonecuttingRecipeBridge.ID, ObfuscatedStonecuttingRecipeBridge.SERIALIZER);
 		Registry.register(Registry.RECIPE_SERIALIZER, ObfuscatedSmithingRecipeBridge.ID, ObfuscatedSmithingRecipeBridge.SERIALIZER);

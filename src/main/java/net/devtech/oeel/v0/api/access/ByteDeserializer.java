@@ -1,5 +1,7 @@
 package net.devtech.oeel.v0.api.access;
 
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import net.devtech.oeel.v0.api.util.IdentifierPacker;
@@ -15,5 +17,5 @@ public interface ByteDeserializer<T> {
 
 	T newInstance();
 
-	void read(T instance, ByteBuffer buffer, HashKey inputHash);
+	void read(T instance, DataInputStream buffer, HashKey inputHash) throws IOException;
 }

@@ -1,5 +1,9 @@
 package net.devtech.oeel.v0.api.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 
@@ -7,6 +11,7 @@ import javax.crypto.Cipher;
 
 import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.impl.OEELInternal;
+import org.jetbrains.annotations.NotNull;
 
 public class OEELEncrypting {
 	/**
@@ -52,4 +57,13 @@ public class OEELEncrypting {
 			throw Validate.rethrow(e);
 		}
 	}
+
+	public static DataInputStream decryptStream(byte[] key, byte[] data) {
+		try {
+			return new DataInputStream(OEELInternal.decryptStream(key, new ByteArrayInputStream(data)));
+		} catch(GeneralSecurityException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 }
