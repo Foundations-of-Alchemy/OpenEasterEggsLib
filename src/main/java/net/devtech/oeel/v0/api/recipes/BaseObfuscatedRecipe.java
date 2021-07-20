@@ -26,28 +26,27 @@ public class BaseObfuscatedRecipe {
 	protected HashFunction<ItemKey> item;
 	protected HashFunction<Entity> entity;
 	protected HashFunction<BlockData> block;
-	private HashKey inputHash;
-	private byte[] encryptedOutput;
+	private byte[] output;
 	@Nullable private Identifier itemHashFunctionId;
 	@Nullable private Identifier entityHashFunctionId;
 	@Nullable private Identifier blockHashFunctionId;
 
 	protected BaseObfuscatedRecipe() {}
 
-	public BaseObfuscatedRecipe(HashKey inputHash,
-			byte[] encryptedOutput,
+	public BaseObfuscatedRecipe(byte[] output,
 			@Nullable Identifier itemHashFunctionId,
 			@Nullable Identifier entityHashFunctionId,
 			@Nullable Identifier blockHashFunctionId) {
-		this.inputHash = inputHash;
-		this.encryptedOutput = encryptedOutput;
+		this.output = output;
 		this.itemHashFunctionId = itemHashFunctionId;
 		this.entityHashFunctionId = entityHashFunctionId;
 		this.blockHashFunctionId = blockHashFunctionId;
 	}
 
-	public boolean isValid(HashKey code, Identifier itemHasherId, Identifier blockHasherId, Identifier entityHasherId) {
-		return this.inputHash.equals(code) && Objects.equals(itemHasherId, this.itemHashFunctionId) && Objects.equals(entityHasherId, this.entityHashFunctionId) && Objects.equals(blockHasherId, this.blockHashFunctionId);
+	public boolean isValid(Identifier itemHasherId, Identifier blockHasherId, Identifier entityHasherId) {
+		return Objects.equals(itemHasherId, this.itemHashFunctionId) && Objects.equals(entityHasherId, this.entityHashFunctionId) && Objects.equals(
+				blockHasherId,
+				this.blockHashFunctionId);
 	}
 
 	public HashFunction<ItemKey> getItemHashFunction() {
@@ -86,43 +85,11 @@ public class BaseObfuscatedRecipe {
 		return block;
 	}
 
-	public HashKey getInputHash() {
-		return this.inputHash;
-	}
-
-	public byte[] getEncryptedOutput() {
-		return this.encryptedOutput;
-	}
-
-	private static class Deserializer<T extends BaseObfuscatedRecipe> implements ByteDeserializer<T> {
-		public final Supplier<T> newInstance;
-		public final String magic;
-
-		private Deserializer(Supplier<T> instance, String magic) {
-			this.newInstance = instance;
-			this.magic = magic;
-		}
-
-		@Override
-		public String magic() {
-			return this.magic;
-		}
-
-		@Override
-		public T newInstance() {
-			return this.newInstance.get();
-		}
-
-		@Override
-		public void read(BaseObfuscatedRecipe instance, ByteBuffer buffer, HashKey inputHash) {
-			instance.inputHash = inputHash;
-			byte[] encryptedOutput = new byte[buffer.getInt()];
-			buffer.get(encryptedOutput);
-			instance.encryptedOutput = encryptedOutput;
-			instance.itemHashFunctionId = readIdentifier(buffer);
-			instance.blockHashFunctionId = readIdentifier(buffer);
-			instance.entityHashFunctionId = readIdentifier(buffer);
-		}
+	/**
+	 * the decrypted output
+	 */
+	public byte[] getOutput() {
+		return this.output;
 	}
 
 	public static Identifier readIdentifier(ByteBuffer buffer) {
@@ -155,6 +122,36 @@ public class BaseObfuscatedRecipe {
 		} finally {
 			buffer.limit(currentLimit);
 			buffer.position(endPos);
+		}
+	}
+
+	private static class Deserializer<T extends BaseObfuscatedRecipe> implements ByteDeserializer<T> {
+		public final Supplier<T> newInstance;
+		public final String magic;
+
+		private Deserializer(Supplier<T> instance, String magic) {
+			this.newInstance = instance;
+			this.magic = magic;
+		}
+
+		@Override
+		public String magic() {
+			return this.magic;
+		}
+
+		@Override
+		public T newInstance() {
+			return this.newInstance.get();
+		}
+
+		@Override
+		public void read(BaseObfuscatedRecipe instance, ByteBuffer buffer, HashKey inputHash) {
+			byte[] output = new byte[buffer.getInt()];
+			buffer.get(output);
+			instance.output = output;
+			instance.itemHashFunctionId = readIdentifier(buffer);
+			instance.blockHashFunctionId = readIdentifier(buffer);
+			instance.entityHashFunctionId = readIdentifier(buffer);
 		}
 	}
 }

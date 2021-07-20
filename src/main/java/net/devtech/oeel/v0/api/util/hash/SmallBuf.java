@@ -2,6 +2,9 @@ package net.devtech.oeel.v0.api.util.hash;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * a rotating thread-safe buffer
+ */
 public final class SmallBuf {
 	static final SmallBuf INSTANCE = new SmallBuf();
 	public final byte[] buffer = new byte[4096];

@@ -23,13 +23,13 @@ public class ObfRecipeManager<T extends BaseObfuscatedRecipe> implements RecipeM
 	}
 
 	@Override
-	public @Nullable T getForInput(HashKey input, Identifier itemHashFunction, Identifier blockHashFunction, Identifier entityHashFunction) {
+	public @Nullable T getForInput(HashKey input, byte[] key, Identifier itemHashFunction, Identifier blockHashFunction, Identifier entityHashFunction) {
 		List<T> recipes = this.recipeCache.get(input);
 		T retValue = null;
 		if(recipes == null) {
 			recipes = new ArrayList<>();
-			for(T t : this.current.readHeaderObject(input, this.deserializer)) {
-				if(t.isValid(input, itemHashFunction, blockHashFunction, entityHashFunction)) {
+			for(T t : this.current.decryptOnce(input, key, this.deserializer)) {
+				if(t.isValid(itemHashFunction, blockHashFunction, entityHashFunction)) {
 					retValue = t;
 				}
 				recipes.add(t);
@@ -42,7 +42,7 @@ public class ObfRecipeManager<T extends BaseObfuscatedRecipe> implements RecipeM
 		}
 
 		for(T recipe : recipes) {
-			if(recipe.isValid(input, itemHashFunction, blockHashFunction, entityHashFunction)) {
+			if(recipe.isValid(itemHashFunction, blockHashFunction, entityHashFunction)) {
 				return recipe;
 			}
 		}

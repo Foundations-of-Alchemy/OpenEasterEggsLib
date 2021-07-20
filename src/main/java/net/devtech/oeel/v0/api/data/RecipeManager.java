@@ -17,5 +17,5 @@ public interface RecipeManager<T> {
 	 * this will prevent it the info from colliding with other recipes.
 	 */
 	@Nullable
-	T getForInput(HashKey input, Identifier itemHashFunction, Identifier blockHashFunction, Identifier entityHashFunction);
+	T getForInput(HashKey input, byte[] key, Identifier itemHashFunction, Identifier blockHashFunction, Identifier entityHashFunction);
 }

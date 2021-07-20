@@ -52,13 +52,19 @@ public class ObfResourceManager extends SinglePreparationResourceReloader<Multim
 		return null;
 	}
 
-	public <T> Iterable<T> readHeaderObject(HashKey validationKey, ByteDeserializer<T> deserializer) {
+	public <T> Iterable<T> decryptOnce(HashKey validationKey, byte[] key, ByteDeserializer<T> deserializer) {
 		long magic = IdentifierPacker.pack(deserializer.magic());
-		return () -> this.encryptedData.get(validationKey).stream().map(ByteBuffer::wrap).filter(buf -> buf.getLong() == magic).map(i -> {
-			T value = deserializer.newInstance();
-			deserializer.read(value, i, validationKey);
-			return value;
-		}).iterator();
+		return () -> this.encryptedData.get(validationKey)
+				             .stream()
+				             .map(b -> OEELEncrypting.decrypt(b, key)) // decrypt
+				             .map(ByteBuffer::wrap)
+				             .filter(buf -> buf.getLong() == magic) // validate magic
+				             .map(i -> {
+					             T value = deserializer.newInstance();
+					             deserializer.read(value, i, validationKey);
+					             return value;
+				             })
+				             .iterator();
 	}
 
 	@Override

@@ -37,8 +37,12 @@ public class OEELEncrypting {
 		return new String(hexChars, StandardCharsets.UTF_8);
 	}
 
-	public static byte[] decrypt(byte[] key, byte[] data) throws GeneralSecurityException {
-		return OEELInternal.crypt(key, data, Cipher.DECRYPT_MODE);
+	public static byte[] decrypt(byte[] key, byte[] data) {
+		try {
+			return OEELInternal.crypt(key, data, Cipher.DECRYPT_MODE);
+		} catch(GeneralSecurityException e) {
+			throw Validate.rethrow(e);
+		}
 	}
 
 	public static byte[] encrypt(byte[] key, byte[] data) {

@@ -46,6 +46,10 @@ public class BiHasher extends AbstractHasher implements Closeable {
 		}
 	}
 
+	public byte[] hashB() {
+		return this.hasherB.hash();
+	}
+
 	@Override
 	protected OutputStream createOutputStream0() {
 		return new OutputStream() {

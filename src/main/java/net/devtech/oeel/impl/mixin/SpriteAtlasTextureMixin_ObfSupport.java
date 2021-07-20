@@ -1,9 +1,6 @@
 package net.devtech.oeel.impl.mixin;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +9,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import com.google.common.collect.Iterables;
 import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.impl.client.ObfTextures;
 import net.devtech.oeel.impl.client.ResourceManagerHack;
@@ -123,19 +121,17 @@ public abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture
 	@Shadow @Final private Identifier id;
 
 	private Sprite oeel_unencryptSprite(HashKey validationKey, byte[] encryptionKey, ObfTextures.AtlasSpace space) throws GeneralSecurityException, IOException {
-		byte[] decrypt = ObfResourceManager.client.decryptOnce(validationKey, encryptionKey, b -> true);
-		InputStream stream = new ByteArrayInputStream(decrypt);
-		DataInputStream data = new DataInputStream(stream);
-		int offsetX = data.readInt(), offsetY = data.readInt();
-		var hack = new ResourceManagerHack(stream);
+		var decrypt = ObfResourceManager.client.decryptOnce(validationKey, encryptionKey, ObfTextures.DESERIALIZER);
+		var only = Iterables.getOnlyElement(decrypt);
+		ResourceManagerHack hack = new ResourceManagerHack(only.data);
 		this.bindTexture();
-		Sprite sprite = this.loadSprite(hack, space.info(), space.atlasWidth(), space.atlasHeight(), space.maxLevel(), space.x() + offsetX, space.y() + offsetY);
-		sprite.upload();
-		TextureTickListener textureTickListener = sprite.getAnimation();
+		var s = this.loadSprite(hack, space.info(), space.atlasWidth(), space.atlasHeight(), space.maxLevel(), space.x() + only.offX, space.y() + only.offY);
+		s.upload();
+		TextureTickListener textureTickListener = s.getAnimation();
 		if(textureTickListener != null) {
 			this.animatedSprites.add(textureTickListener);
 		}
 
-		return sprite;
+		return s;
 	}
 }

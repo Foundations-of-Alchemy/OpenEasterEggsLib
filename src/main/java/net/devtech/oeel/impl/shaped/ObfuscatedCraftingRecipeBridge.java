@@ -16,7 +16,6 @@ import net.devtech.oeel.v0.api.OEEL;
 import net.devtech.oeel.v0.api.access.HashFunction;
 import net.devtech.oeel.v0.api.data.HashFunctionManager;
 import net.devtech.oeel.v0.api.recipes.BaseObfuscatedRecipe;
-import net.devtech.oeel.v0.api.util.OEELEncrypting;
 import net.devtech.oeel.v0.api.util.OEELSerializing;
 import net.devtech.oeel.v0.api.util.hash.BiHasher;
 import net.devtech.oeel.v0.api.util.hash.HashKey;
@@ -51,12 +50,12 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 		for(Map.Entry<Identifier, HashFunction<ItemKey>> entry : HashFunctionManager.ITEM_HASH_FUNCTIONS.entrySet()) {
 			HashFunction<ItemKey> function = entry.getValue();
 			EncryptionEntry test = hash.apply(function);
-			BaseObfuscatedRecipe recipe = OEEL.RECIPES.getForInput(test.validation(), entry.getKey(), null, null);
+			BaseObfuscatedRecipe recipe = OEEL.RECIPES.getForInput(test.validation(), test.key(), entry.getKey(), null, null);
 			if(recipe != null) {
 				if(testingForEmpty) {
 					return STACK;
 				} else {
-					return OEELSerializing.deserializeItem(OEELEncrypting.decrypt(test.key(), recipe.getEncryptedOutput()));
+					return OEELSerializing.deserializeItem(recipe.getOutput());
 				}
 			}
 		}
