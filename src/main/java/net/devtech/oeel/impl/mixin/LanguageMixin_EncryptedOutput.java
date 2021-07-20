@@ -5,7 +5,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.function.UnaryOperator;
 
-import com.google.common.hash.HashCode;
 import net.devtech.oeel.v0.api.util.OEELEncrypting;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,16 +34,15 @@ public abstract class LanguageMixin_EncryptedOutput extends Language {
 			}
 
 			String langKey = key.substring(0, index); // the key in the en_us.json file
-			String decryption = key.substring(index + 1); // the decryption key
-			HashCode decryptionKey = HashCode.fromString(decryption);
+			byte[] decrypt = OEELEncrypting.decodeBase16(key, index + 1, key.length());
 
 			String encryptedOutput = langGetter.apply(langKey);
 			if(encryptedOutput == null || encryptedOutput.equals(langKey)) {
 				return null;
 			}
 
-			byte[] decryptedOutput = OEELEncrypting.decrypt(decryptionKey, OEELEncrypting.decodeBase16(encryptedOutput));
-			return new String(decryptedOutput, StandardCharsets.UTF_8);
+			byte[] data =  OEELEncrypting.decodeBase16(encryptedOutput, 0, encryptedOutput.length());
+			return new String(OEELEncrypting.decrypt(decrypt, data), StandardCharsets.UTF_8);
 		}
 		return null;
 	}

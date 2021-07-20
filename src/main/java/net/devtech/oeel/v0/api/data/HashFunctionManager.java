@@ -8,16 +8,15 @@ import java.util.Map;
 import java.util.function.Function;
 
 import com.google.common.collect.ListMultimap;
-import com.google.common.hash.Hasher;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.astrarre.itemview.v0.fabric.ItemKey;
 import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.v0.api.access.DynamicHashFunction;
 import net.devtech.oeel.v0.api.access.HashFunction;
-import net.devtech.oeel.v0.api.data.MultiJsonDataLoader;
 import net.devtech.oeel.v0.api.util.BlockData;
 import net.devtech.oeel.v0.api.util.OEELEncrypting;
+import net.devtech.oeel.v0.api.util.hash.Hasher;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.tag.ServerTagManagerHolder;

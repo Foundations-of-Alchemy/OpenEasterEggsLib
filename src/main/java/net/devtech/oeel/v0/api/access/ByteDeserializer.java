@@ -2,8 +2,8 @@ package net.devtech.oeel.v0.api.access;
 
 import java.nio.ByteBuffer;
 
-import com.google.common.hash.HashCode;
 import net.devtech.oeel.v0.api.util.IdentifierPacker;
+import net.devtech.oeel.v0.api.util.hash.HashKey;
 
 public interface ByteDeserializer<T> {
 	/**
@@ -15,5 +15,5 @@ public interface ByteDeserializer<T> {
 
 	T newInstance();
 
-	void read(T instance, ByteBuffer buffer, HashCode inputHash);
+	void read(T instance, ByteBuffer buffer, HashKey inputHash);
 }

@@ -1,7 +1,5 @@
 package net.devtech.oeel.impl.client;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;

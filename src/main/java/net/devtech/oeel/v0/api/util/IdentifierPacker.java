@@ -2,11 +2,9 @@ package net.devtech.oeel.v0.api.util;
 
 import java.util.Arrays;
 
-import it.unimi.dsi.fastutil.chars.CharArrayList;
 import it.unimi.dsi.fastutil.chars.CharOpenHashSet;
 import it.unimi.dsi.fastutil.chars.CharSet;
 
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 /**

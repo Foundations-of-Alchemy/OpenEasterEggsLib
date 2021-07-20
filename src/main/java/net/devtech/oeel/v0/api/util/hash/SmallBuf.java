@@ -3,12 +3,12 @@ package net.devtech.oeel.v0.api.util.hash;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class SmallBuf {
-	static final SmallBuf COPY = new SmallBuf();
+	static final SmallBuf INSTANCE = new SmallBuf();
 	public final byte[] buffer = new byte[4096];
-	public final AtomicInteger reserve = new AtomicInteger();
+	public final AtomicInteger reserve = new AtomicInteger(-64);
 
 	public int getSection() {
-		return this.reserve.getAndAdd(64) & 0xfff;
+		return this.reserve.addAndGet(64) & 4095;
 	}
 
 	public static long getLong(byte[] buf, int off) {

@@ -1,16 +1,18 @@
 package net.devtech.oeel.v0.api.recipes;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import com.google.common.hash.HashCode;
 import io.github.astrarre.itemview.v0.fabric.ItemKey;
-import net.devtech.oeel.v0.api.data.HashFunctionManager;
 import net.devtech.oeel.v0.api.access.ByteDeserializer;
 import net.devtech.oeel.v0.api.access.HashFunction;
+import net.devtech.oeel.v0.api.data.HashFunctionManager;
 import net.devtech.oeel.v0.api.util.BlockData;
+import net.devtech.oeel.v0.api.util.IdentifierPacker;
+import net.devtech.oeel.v0.api.util.hash.HashKey;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.entity.Entity;
@@ -24,7 +26,7 @@ public class BaseObfuscatedRecipe {
 	protected HashFunction<ItemKey> item;
 	protected HashFunction<Entity> entity;
 	protected HashFunction<BlockData> block;
-	private HashCode inputHash;
+	private HashKey inputHash;
 	private byte[] encryptedOutput;
 	@Nullable private Identifier itemHashFunctionId;
 	@Nullable private Identifier entityHashFunctionId;
@@ -32,7 +34,7 @@ public class BaseObfuscatedRecipe {
 
 	protected BaseObfuscatedRecipe() {}
 
-	public BaseObfuscatedRecipe(HashCode inputHash,
+	public BaseObfuscatedRecipe(HashKey inputHash,
 			byte[] encryptedOutput,
 			@Nullable Identifier itemHashFunctionId,
 			@Nullable Identifier entityHashFunctionId,
@@ -44,7 +46,7 @@ public class BaseObfuscatedRecipe {
 		this.blockHashFunctionId = blockHashFunctionId;
 	}
 
-	public boolean isValid(HashCode code, Identifier itemHasherId, Identifier blockHasherId, Identifier entityHasherId) {
+	public boolean isValid(HashKey code, Identifier itemHasherId, Identifier blockHasherId, Identifier entityHasherId) {
 		return this.inputHash.equals(code) && Objects.equals(itemHasherId, this.itemHashFunctionId) && Objects.equals(entityHasherId, this.entityHashFunctionId) && Objects.equals(blockHasherId, this.blockHashFunctionId);
 	}
 
@@ -84,7 +86,7 @@ public class BaseObfuscatedRecipe {
 		return block;
 	}
 
-	public HashCode getInputHash() {
+	public HashKey getInputHash() {
 		return this.inputHash;
 	}
 
@@ -112,7 +114,7 @@ public class BaseObfuscatedRecipe {
 		}
 
 		@Override
-		public void read(BaseObfuscatedRecipe instance, ByteBuffer buffer, HashCode inputHash) {
+		public void read(BaseObfuscatedRecipe instance, ByteBuffer buffer, HashKey inputHash) {
 			instance.inputHash = inputHash;
 			byte[] encryptedOutput = new byte[buffer.getInt()];
 			buffer.get(encryptedOutput);
@@ -124,16 +126,32 @@ public class BaseObfuscatedRecipe {
 	}
 
 	public static Identifier readIdentifier(ByteBuffer buffer) {
-		int len = buffer.getInt();
-		if(len == 0) {
+		long packedName = buffer.getLong();
+		if(packedName == 0) {
 			return null;
 		}
-		int currentLimit = buffer.limit();
-		int endPos = buffer.position() + len;
+		long packedPath = buffer.getLong();
+		String name, path;
+		if(packedName != -1) {
+			name = IdentifierPacker.unpack(packedName);
+		} else {
+			name = readString(buffer, StandardCharsets.US_ASCII);
+		}
+
+		if(packedPath != -1) {
+			path = IdentifierPacker.unpack(packedPath);
+		} else {
+			path = readString(buffer, StandardCharsets.US_ASCII);
+		}
+
+		return new Identifier(name, path);
+	}
+
+	public static String readString(ByteBuffer buffer, Charset charset) {
+		int len = buffer.getInt(), currentLimit = buffer.limit(), endPos = buffer.position() + len;
 		try {
 			buffer.limit(len);
-			String decoded = StandardCharsets.US_ASCII.decode(buffer).toString();
-			return new Identifier(decoded);
+			return charset.decode(buffer).toString();
 		} finally {
 			buffer.limit(currentLimit);
 			buffer.position(endPos);

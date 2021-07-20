@@ -1,9 +1,7 @@
 package net.devtech.oeel.v0.api.data;
 
-import java.util.Collection;
-
-import com.google.common.hash.HashCode;
 import net.devtech.oeel.v0.api.OEEL;
+import net.devtech.oeel.v0.api.util.hash.HashKey;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.util.Identifier;
@@ -19,5 +17,5 @@ public interface RecipeManager<T> {
 	 * this will prevent it the info from colliding with other recipes.
 	 */
 	@Nullable
-	T getForInput(HashCode input, Identifier itemHashFunction, Identifier blockHashFunction, Identifier entityHashFunction);
+	T getForInput(HashKey input, Identifier itemHashFunction, Identifier blockHashFunction, Identifier entityHashFunction);
 }

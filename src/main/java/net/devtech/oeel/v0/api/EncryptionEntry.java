@@ -1,10 +1,6 @@
 package net.devtech.oeel.v0.api;
 
-import com.google.common.hash.HashCode;
-import net.devtech.oeel.v0.api.util.BiHasher;
+import net.devtech.oeel.v0.api.util.hash.HashKey;
 
-public record EncryptionEntry(HashCode validation, HashCode encryption) {
-	public EncryptionEntry(BiHasher hasher) {
-		this(hasher.hashA(), hasher.hashB());
-	}
+public record EncryptionEntry(HashKey validation, byte[] key) {
 }

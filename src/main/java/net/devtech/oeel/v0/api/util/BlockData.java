@@ -1,7 +1,5 @@
 package net.devtech.oeel.v0.api.util;
 
-import java.util.function.Predicate;
-
 import io.github.astrarre.util.v0.api.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

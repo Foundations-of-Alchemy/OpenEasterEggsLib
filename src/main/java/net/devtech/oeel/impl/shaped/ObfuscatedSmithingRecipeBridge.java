@@ -1,19 +1,14 @@
 package net.devtech.oeel.impl.shaped;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.common.hash.Hasher;
 import io.github.astrarre.itemview.v0.fabric.ItemKey;
 import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.impl.OEELInternal;
-import net.devtech.oeel.v0.api.EncryptionEntry;
-import net.devtech.oeel.v0.api.util.BiHasher;
-import net.devtech.oeel.v0.api.util.OEELEncrypting;
-import net.devtech.oeel.v0.api.util.OEELHashing;
+import net.devtech.oeel.v0.api.util.hash.BiHasher;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -58,13 +53,14 @@ public class ObfuscatedSmithingRecipeBridge extends SmithingRecipe {
 	public static ItemStack craft(Inventory inventory, boolean testingForEmpty) {
 		try {
 			return ObfuscatedCraftingRecipeBridge.craft(testingForEmpty, function -> {
-				BiHasher hasher = BiHasher.createDefault(testingForEmpty);
-				hasher.putIdentifier(ID);
-				for(int i = 0; i < 2; i++) {
-					ItemStack stack = inventory.getStack(i);
-					function.hash(hasher, ItemKey.of(stack));
+				try(BiHasher hasher = BiHasher.createDefault(testingForEmpty)) {
+					hasher.putIdentifier(ID);
+					for(int i = 0; i < 2; i++) {
+						ItemStack stack = inventory.getStack(i);
+						function.hash(hasher, ItemKey.of(stack));
+					}
+					return hasher.hash();
 				}
-				return new EncryptionEntry(hasher);
 			});
 		} catch(GeneralSecurityException | IOException e) {
 			throw Validate.rethrow(e);

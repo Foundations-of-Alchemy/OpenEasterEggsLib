@@ -12,13 +12,12 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import com.google.common.hash.HashCode;
 import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.impl.client.ObfTextures;
 import net.devtech.oeel.impl.client.ResourceManagerHack;
 import net.devtech.oeel.v0.api.data.ObfResourceManager;
 import net.devtech.oeel.v0.api.util.HashId;
-import net.devtech.oeel.v0.api.util.OEELEncrypting;
+import net.devtech.oeel.v0.api.util.hash.HashKey;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -70,6 +69,7 @@ public abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture
 		}
 	}
 
+	@SuppressWarnings("UnresolvedMixinReference")
 	@Inject(method = "method_24105",
 			at = @At(value = "INVOKE",
 					target = "Ljava/util/concurrent/CompletableFuture;runAsync(Ljava/lang/Runnable;Ljava/util/concurrent/Executor;)" + "Ljava/util" +
@@ -105,7 +105,7 @@ public abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture
 			ObfTextures.AtlasSpace space = this.oeel_atlasSpace.get(atlasId);
 			HashId id = HashId.getKey(spriteId);
 			if(id == null) break outer;
-			Sprite sprite = this.oeel_unencryptSprite(id.a, id.b, space);
+			Sprite sprite = this.oeel_unencryptSprite(id.validation, id.encryption, space);
 			map.put(spriteId, sprite);
 			return sprite;
 		} catch(IllegalArgumentException | NullPointerException e) {
@@ -122,12 +122,11 @@ public abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture
 
 	@Shadow @Final private Identifier id;
 
-	private Sprite oeel_unencryptSprite(HashCode validationKey, HashCode encryptionKey, ObfTextures.AtlasSpace space) throws GeneralSecurityException, IOException {
-		byte[] decrypt = ObfResourceManager.client.decryptOnce(validationKey, b -> true, encryptionKey);
+	private Sprite oeel_unencryptSprite(HashKey validationKey, byte[] encryptionKey, ObfTextures.AtlasSpace space) throws GeneralSecurityException, IOException {
+		byte[] decrypt = ObfResourceManager.client.decryptOnce(validationKey, encryptionKey, b -> true);
 		InputStream stream = new ByteArrayInputStream(decrypt);
 		DataInputStream data = new DataInputStream(stream);
 		int offsetX = data.readInt(), offsetY = data.readInt();
-
 		var hack = new ResourceManagerHack(stream);
 		this.bindTexture();
 		Sprite sprite = this.loadSprite(hack, space.info(), space.atlasWidth(), space.atlasHeight(), space.maxLevel(), space.x() + offsetX, space.y() + offsetY);

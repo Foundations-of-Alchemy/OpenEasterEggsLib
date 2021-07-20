@@ -4,13 +4,12 @@ import java.security.DigestException;
 import java.security.MessageDigest;
 
 import com.google.common.hash.HashCode;
-import net.devtech.oeel.impl.OEELInternal;
 import org.jetbrains.annotations.NotNull;
 
-public class Hash512 extends FixedBuffer<Hash512> {
+public class BigHashKey extends FixedBuffer<BigHashKey> {
 	long a, b, c, d, e, f, g, h;
 
-	public Hash512(long a, long b, long c, long d, long e, long f, long g, long h) {
+	public BigHashKey(long a, long b, long c, long d, long e, long f, long g, long h) {
 		this.a = a;
 		this.b = b;
 		this.c = c;
@@ -21,9 +20,9 @@ public class Hash512 extends FixedBuffer<Hash512> {
 		this.h = h;
 	}
 
-	public Hash512(MessageDigest digest) throws DigestException {
-		byte[] data = SmallBuf.COPY.buffer;
-		int off = SmallBuf.COPY.getSection();
+	public BigHashKey(MessageDigest digest) throws DigestException {
+		byte[] data = SmallBuf.INSTANCE.buffer;
+		int off = SmallBuf.INSTANCE.getSection();
 		digest.digest(data, off, 32);
 		this.a = SmallBuf.getLong(data, off + 0);
 		this.b = SmallBuf.getLong(data, off + 8);
@@ -35,7 +34,7 @@ public class Hash512 extends FixedBuffer<Hash512> {
 		this.h = SmallBuf.getLong(data, off + 56);
 	}
 
-	public Hash512(Hash256 a, Hash256 b) {
+	public BigHashKey(HashKey a, HashKey b) {
 		this.a = a.a;
 		this.b = a.b;
 		this.c = a.c;
@@ -46,9 +45,9 @@ public class Hash512 extends FixedBuffer<Hash512> {
 		this.h = b.d;
 	}
 
-	public Hash512(HashCode code) {
-		byte[] data = SmallBuf.COPY.buffer;
-		int off = SmallBuf.COPY.getSection();
+	public BigHashKey(HashCode code) {
+		byte[] data = SmallBuf.INSTANCE.buffer;
+		int off = SmallBuf.INSTANCE.getSection();
 		code.writeBytesTo(data, off, 32);
 		this.a = SmallBuf.getLong(data, off + 0);
 		this.b = SmallBuf.getLong(data, off + 8);
@@ -60,7 +59,7 @@ public class Hash512 extends FixedBuffer<Hash512> {
 		this.h = SmallBuf.getLong(data, off + 56);
 	}
 
-	public Hash512(byte[] data, int off) {
+	public BigHashKey(byte[] data, int off) {
 		this.a = SmallBuf.getLong(data, off + 0);
 		this.b = SmallBuf.getLong(data, off + 8);
 		this.c = SmallBuf.getLong(data, off + 16);
@@ -71,7 +70,7 @@ public class Hash512 extends FixedBuffer<Hash512> {
 		this.h = SmallBuf.getLong(data, off + 56);
 	}
 
-	public Hash512(String base16) {
+	public BigHashKey(String base16) {
 		int index = 0;
 		this.a = Long.parseLong(base16, index += 16, index, 16);
 		this.b = Long.parseLong(base16, index += 16, index, 16);
@@ -84,7 +83,7 @@ public class Hash512 extends FixedBuffer<Hash512> {
 	}
 
 	@Override
-	public int compareTo(@NotNull Hash512 o) {
+	public int compareTo(@NotNull BigHashKey o) {
 		long comp;
 		if((comp = this.a - o.a) != 0) return (int) comp;
 		if((comp = this.b - o.b) != 0) return (int) comp;
@@ -120,7 +119,7 @@ public class Hash512 extends FixedBuffer<Hash512> {
 
 	@Override
 	public boolean equals(Object o) {
-		return this == o || o instanceof Hash512 h && this.compareTo(h) == 0;
+		return this == o || o instanceof BigHashKey h && this.compareTo(h) == 0;
 	}
 
 	@Override

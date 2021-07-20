@@ -1,42 +1,51 @@
 package net.devtech.oeel.v0.api.util.hash;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.DigestException;
 import java.security.MessageDigest;
 
 import com.google.common.hash.HashCode;
+import io.github.astrarre.util.v0.api.Validate;
 import org.jetbrains.annotations.NotNull;
 
-public final class Hash256 extends FixedBuffer<Hash256> {
+public final class HashKey extends FixedBuffer<HashKey> {
+	public static final int BYTES = 32;
+
 	long a, b, c, d;
 
-	public Hash256(long a, long b, long c, long d) {
+	public HashKey(long a, long b, long c, long d) {
 		this.a = a;
 		this.b = b;
 		this.c = c;
 		this.d = d;
 	}
 
-	public Hash256(String base16) {
-		int index = 0;
+	public HashKey(CharSequence base16, int off) {
+		int index = off;
 		this.a = Long.parseLong(base16, index += 16, index, 16);
 		this.b = Long.parseLong(base16, index += 16, index, 16);
 		this.c = Long.parseLong(base16, index += 16, index, 16);
 		this.d = Long.parseLong(base16, index += 16, index, 16);
 	}
 
-	public Hash256(MessageDigest digest) throws DigestException {
-		byte[] data = SmallBuf.COPY.buffer;
-		int off = SmallBuf.COPY.getSection();
-		digest.digest(data, off, 32);
-		this.a = SmallBuf.getLong(data, off + 0);
-		this.b = SmallBuf.getLong(data, off + 8);
-		this.c = SmallBuf.getLong(data, off + 16);
-		this.d = SmallBuf.getLong(data, off + 24);
+	public HashKey(MessageDigest digest) {
+		try {
+			byte[] data = SmallBuf.INSTANCE.buffer;
+			int off = SmallBuf.INSTANCE.getSection();
+			digest.digest(data, off, 32);
+			this.a = SmallBuf.getLong(data, off + 0);
+			this.b = SmallBuf.getLong(data, off + 8);
+			this.c = SmallBuf.getLong(data, off + 16);
+			this.d = SmallBuf.getLong(data, off + 24);
+		} catch(DigestException e) {
+			throw Validate.rethrow(e);
+		}
 	}
 
-	public Hash256(HashCode code) {
-		byte[] data = SmallBuf.COPY.buffer;
-		int off = SmallBuf.COPY.getSection();
+	public HashKey(HashCode code) {
+		byte[] data = SmallBuf.INSTANCE.buffer;
+		int off = SmallBuf.INSTANCE.getSection();
 		code.writeBytesTo(data, off, 32);
 		this.a = SmallBuf.getLong(data, off + 0);
 		this.b = SmallBuf.getLong(data, off + 8);
@@ -44,11 +53,28 @@ public final class Hash256 extends FixedBuffer<Hash256> {
 		this.d = SmallBuf.getLong(data, off + 24);
 	}
 
-	public Hash256(byte[] data, int off) {
+	public HashKey(byte[] data, int off) {
 		this.a = SmallBuf.getLong(data, off + 0);
 		this.b = SmallBuf.getLong(data, off + 8);
 		this.c = SmallBuf.getLong(data, off + 16);
 		this.d = SmallBuf.getLong(data, off + 24);
+	}
+
+	public HashKey(InputStream stream) throws IOException {
+		byte[] data = SmallBuf.INSTANCE.buffer;
+		stream.read(data, 0, BYTES);
+		int off = SmallBuf.INSTANCE.getSection();
+		this.a = SmallBuf.getLong(data, off + 0);
+		this.b = SmallBuf.getLong(data, off + 8);
+		this.c = SmallBuf.getLong(data, off + 16);
+		this.d = SmallBuf.getLong(data, off + 24);
+	}
+
+	public void hash(Hasher hasher) {
+		hasher.putLong(this.a);
+		hasher.putLong(this.b);
+		hasher.putLong(this.c);
+		hasher.putLong(this.d);
 	}
 
 	@Override
@@ -69,7 +95,7 @@ public final class Hash256 extends FixedBuffer<Hash256> {
 	}
 
 	@Override
-	public int compareTo(@NotNull Hash256 o) {
+	public int compareTo(@NotNull HashKey o) {
 		long comp;
 		if((comp = this.a - o.a) != 0) {
 			return (int) comp;
@@ -97,6 +123,6 @@ public final class Hash256 extends FixedBuffer<Hash256> {
 
 	@Override
 	public boolean equals(Object o) {
-		return this == o || o instanceof Hash256 h && this.compareTo(h) == 0;
+		return this == o || o instanceof HashKey h && this.compareTo(h) == 0;
 	}
 }

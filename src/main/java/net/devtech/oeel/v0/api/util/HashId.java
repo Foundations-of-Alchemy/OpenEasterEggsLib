@@ -1,20 +1,20 @@
 package net.devtech.oeel.v0.api.util;
 
-import com.google.common.hash.HashCode;
+import net.devtech.oeel.v0.api.util.hash.HashKey;
 
 import net.minecraft.util.Identifier;
 
 public class HashId extends Identifier {
-	public final HashCode a, b;
-	protected HashId(String[] id, HashCode a, HashCode b) {
+	public final HashKey validation;
+	public final byte[] encryption;
+	protected HashId(String[] id, HashKey validation, byte[] encryption) {
 		super(id);
-		this.a = a;
-		this.b = b;
+		this.validation = validation;
+		this.encryption = encryption;
 	}
 
-	public static HashId create(Identifier identifier, HashCode validation, HashCode encryption) {
-		byte[] keyBytes = validation.asBytes(), encryptionBytes = encryption.asBytes();
-		String value = identifier.getPath() + "/oeel/" + OEELEncrypting.encodeBase16(keyBytes) + "." + OEELEncrypting.encodeBase16(encryptionBytes);
+	public static HashId create(Identifier identifier, HashKey validation, byte[] encryption) {
+		String value = identifier.getPath() + "/oeel/" + validation + "." + OEELEncrypting.encodeBase16(encryption);
 		return new HashId(new String[] {identifier.getNamespace(), value}, validation, encryption);
 	}
 
@@ -27,15 +27,9 @@ public class HashId extends Identifier {
 			if(index == 5) return null;
 			int seperator = path.lastIndexOf('.');
 			if(index > seperator) return null;
-			HashCode validation = HashCode.fromString(path.substring(index, seperator));
-			HashCode encryption = HashCode.fromString(path.substring(seperator + 1));
+			HashKey validation = new HashKey(path, index);
+			byte[] encryption = OEELEncrypting.decodeBase16(path, seperator + 1, path.length());
 			return new HashId(new String[] {id.getNamespace(), id.getPath()}, validation, encryption);
 		}
-	}
-
-	public static void main(String[] args) {
-		HashId test = create(new Identifier("bru", "a"), HashCode.fromLong(384249), HashCode.fromLong(304390409));
-		Identifier yeet = new Identifier(test.namespace, test.path);
-		getKey(yeet);
 	}
 }

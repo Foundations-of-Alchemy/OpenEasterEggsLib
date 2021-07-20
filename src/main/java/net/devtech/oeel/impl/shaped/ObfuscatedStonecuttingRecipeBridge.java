@@ -1,19 +1,14 @@
 package net.devtech.oeel.impl.shaped;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.common.hash.Hasher;
 import io.github.astrarre.itemview.v0.fabric.ItemKey;
 import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.impl.OEELInternal;
-import net.devtech.oeel.v0.api.EncryptionEntry;
-import net.devtech.oeel.v0.api.util.BiHasher;
-import net.devtech.oeel.v0.api.util.OEELEncrypting;
-import net.devtech.oeel.v0.api.util.OEELHashing;
+import net.devtech.oeel.v0.api.util.hash.BiHasher;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -54,12 +49,13 @@ public class ObfuscatedStonecuttingRecipeBridge extends StonecuttingRecipe {
 	public static ItemStack craft(Inventory inventory, boolean testingForEmpty) {
 		try {
 			return ObfuscatedCraftingRecipeBridge.craft(testingForEmpty, function -> {
-				BiHasher hasher = BiHasher.createDefault(testingForEmpty);
-				hasher.putIdentifier(ID);
-				ItemStack stack = inventory.getStack(0);
-				function.hash(hasher, ItemKey.of(stack));
-				// oh fuck I may need to also have amount idk
-				return new EncryptionEntry(hasher);
+				try(BiHasher hasher = BiHasher.createDefault(testingForEmpty)) {
+					hasher.putIdentifier(ID);
+					ItemStack stack = inventory.getStack(0);
+					function.hash(hasher, ItemKey.of(stack));
+					// oh fuck I may need to also have amount idk
+					return hasher.hash();
+				}
 			});
 		} catch(GeneralSecurityException | IOException e) {
 			throw Validate.rethrow(e);
