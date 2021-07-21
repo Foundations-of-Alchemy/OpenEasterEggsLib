@@ -12,7 +12,7 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
 @Mixin(value = ItemStack.class, priority = 10)
-public class ItemStackMixin_OverrideTranslation {
+class ItemStackMixin_OverrideTranslation {
 	@Inject(method = "getTranslationKey", at = @At("HEAD"), cancellable = true)
 	public void onGetTranslationKey(CallbackInfoReturnable<String> cir) {
 		ItemStack stack = (ItemStack) (Object) this;

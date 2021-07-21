@@ -13,7 +13,7 @@ import net.minecraft.resource.ReloadableResourceManager;
 import net.minecraft.resource.ResourceManager;
 
 @Mixin(MinecraftClient.class)
-public abstract class MinecraftClientMixin_ClientHook {
+abstract class MinecraftClientMixin_ClientHook {
 	@Shadow public abstract ResourceManager getResourceManager();
 
 	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/resource/ResourcePackManager;scanPacks()V"))

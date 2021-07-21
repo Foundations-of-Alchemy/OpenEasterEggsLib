@@ -2,14 +2,10 @@ package net.devtech.oeel.v0.api.recipes;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.function.Supplier;
 
 import io.github.astrarre.itemview.v0.fabric.ItemKey;
-import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.v0.api.access.ByteDeserializer;
 import net.devtech.oeel.v0.api.access.HashFunction;
 import net.devtech.oeel.v0.api.data.HashFunctionManager;
@@ -59,7 +55,7 @@ public class BaseObfuscatedRecipe {
 			if(id == null) {
 				return null;
 			}
-			this.item = item = HashFunctionManager.item(id);
+			this.item = item = HashFunctionManager.ITEM_COMP.forId(id);
 		}
 		return item;
 	}
@@ -71,7 +67,7 @@ public class BaseObfuscatedRecipe {
 			if(id == null) {
 				return null;
 			}
-			this.entity = entity = HashFunctionManager.entity(id);
+			this.entity = entity = HashFunctionManager.ENTITY_COMP.forId(id);
 		}
 		return entity;
 	}
@@ -83,7 +79,7 @@ public class BaseObfuscatedRecipe {
 			if(id == null) {
 				return null;
 			}
-			this.block = block = HashFunctionManager.block(id);
+			this.block = block = HashFunctionManager.BLOCK_COMP.forId(id);
 		}
 		return block;
 	}

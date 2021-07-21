@@ -38,7 +38,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
 
 @Mixin(SpriteAtlasTexture.class)
-public abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture {
+abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture {
 	final Map<Sprite.Info, ObfTextures.Key> oeel_encryptedSpriteData = new HashMap<>();
 	final Map<Identifier, ObfTextures.TotalAtlasSpace> oeel_atlasSpace = new HashMap<>();
 	int mipmapLevel;

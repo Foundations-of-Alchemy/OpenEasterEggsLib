@@ -32,7 +32,7 @@ public class ObfTextures {
 	public static final SpriteDataDeserializer DESERIALIZER = new SpriteDataDeserializer();
 	static final Type ATLAS_TYPE = new TypeToken<Map<String, AtlasMeta>>() {}.getType();
 
-	public static List<Key> getMetas(ResourceManager manager) throws IOException {
+	public static List<Key> getMetas(ResourceManager manager) {
 		List<Key> newMetas = new ArrayList<>();
 
 		ObfResourceManager.findResources(ResourceType.SERVER_DATA, manager, "obf_atlas", s -> s.endsWith(".json")).forEach((identifier, stream) -> {
@@ -48,9 +48,6 @@ public class ObfTextures {
 
 		return newMetas;
 	}
-
-
-	record Resource(Identifier id, InputStream stream) {}
 
 	public record Key(Identifier id, Map<String, AtlasMeta> meta) {}
 

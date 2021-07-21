@@ -14,7 +14,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.util.registry.DynamicRegistryManager;
 
 @Mixin(ServerResourceManager.class)
-public class ServerResourceManagerMixin_Event {
+class ServerResourceManagerMixin_Event {
 	@Shadow @Final private ReloadableResourceManager resourceManager;
 
 	@Inject(method = "<init>",

@@ -16,11 +16,18 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.github.astrarre.util.v0.api.Id;
 import io.github.astrarre.util.v0.api.Validate;
+import net.devtech.oeel.v0.api.OEEL;
+import net.devtech.oeel.v0.api.data.HashFunctionManager;
+import net.devtech.oeel.v0.api.util.BlockData;
 
+import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
 @SuppressWarnings("UnstableApiUsage")
 public class OEELInternal {

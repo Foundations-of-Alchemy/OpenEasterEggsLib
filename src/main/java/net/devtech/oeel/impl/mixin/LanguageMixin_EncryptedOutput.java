@@ -15,7 +15,7 @@ import net.minecraft.client.resource.language.TranslationStorage;
 import net.minecraft.util.Language;
 
 @Mixin(value = TranslationStorage.class, targets = "net/minecraft/util/Language$1")
-public abstract class LanguageMixin_EncryptedOutput extends Language {
+abstract class LanguageMixin_EncryptedOutput extends Language {
 	private static final String OEEL_LANG_STARTER = "lang.info.";
 
 	@Inject(method = "get(Ljava/lang/String;)Ljava/lang/String;", at = @At("RETURN"), cancellable = true)

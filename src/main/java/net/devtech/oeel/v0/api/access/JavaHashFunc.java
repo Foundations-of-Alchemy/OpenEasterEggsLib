@@ -4,4 +4,4 @@ import java.util.function.Function;
 
 import com.google.gson.JsonElement;
 
-public interface DynamicHashFunction<T> extends Function<JsonElement, HashFunction<T>> {}
+public interface JavaHashFunc<T> extends Function<JsonElement, HashFunction<T>> {}
