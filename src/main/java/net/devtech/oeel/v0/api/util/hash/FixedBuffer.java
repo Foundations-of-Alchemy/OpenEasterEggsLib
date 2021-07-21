@@ -19,7 +19,7 @@ public abstract class FixedBuffer<Self extends FixedBuffer<Self>> implements Com
 		builder.ensureCapacity(builder.capacity() + 128);
 		for(int i = 0; i < this.bytes(); i++) {
 			byte b = this.getByte(i);
-			builder.append(OEELInternal.HEX_ARRAY_C[b >>> 4]);
+			builder.append(OEELInternal.HEX_ARRAY_C[(b & 0xF0) >>> 4]);
 			builder.append(OEELInternal.HEX_ARRAY_C[b & 0x0F]);
 		}
 	}

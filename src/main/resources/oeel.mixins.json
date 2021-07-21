@@ -11,6 +11,7 @@
     "SpriteAtlasTextureMixin_ObfSupport"
   ],
   "client": [
+    "MinecraftClientMixin_ClientHook"
   ],
   "injectors": {
     "defaultRequire": 1

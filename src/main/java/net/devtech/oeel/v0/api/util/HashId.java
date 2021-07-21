@@ -13,6 +13,10 @@ public class HashId extends Identifier {
 		this.encryption = encryption;
 	}
 
+	public static HashId create(Identifier identifier, EncryptionEntry entry) {
+		return create(identifier, entry.entryKey(), entry.encryptionKey());
+	}
+
 	public static HashId create(Identifier identifier, HashKey validation, byte[] encryption) {
 		String value = identifier.getPath() + "/oeel/" + validation + "." + OEELEncrypting.encodeBase16(encryption);
 		return new HashId(new String[] {identifier.getNamespace(), value}, validation, encryption);

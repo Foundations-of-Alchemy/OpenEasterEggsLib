@@ -53,7 +53,7 @@ public abstract class AbstractBakedModel implements UnbakedModel {
 			                                                          .map(r -> r.blendMode(0, BlendMode.TRANSLUCENT)).map(MaterialFinder::find);
 	public static final Lazy<RenderMaterial> TRANSPARENT = RENDERER.map(Renderer::materialFinder).map(r -> r.blendMode(0, BlendMode.TRANSLUCENT))
 			                                                       .map(MaterialFinder::find);
-	protected static final Map<SpriteIdentifier, Sprite> RESOLVED = new ConcurrentHashMap<>();
+	protected final Map<SpriteIdentifier, Sprite> resolved = new ConcurrentHashMap<>(); // todo clear
 	private static final Identifier DEFAULT_BLOCK_MODEL = new Identifier("minecraft:block/block");
 	protected final Set<SpriteIdentifier> textureDependencies = new HashSet<>();
 	protected final SpriteIdentifier particles;
@@ -64,13 +64,13 @@ public abstract class AbstractBakedModel implements UnbakedModel {
 		this.textureDependencies.add(particles);
 	}
 
-	public static void buildCube(ModelBakeSettings rotations, QuadEmitter emitter, Function<SpriteIdentifier, Sprite> textureGetter, CubeData data) {
+	public void buildCube(ModelBakeSettings rotations, QuadEmitter emitter, Function<SpriteIdentifier, Sprite> textureGetter, CubeData data) {
 		for (Direction direction : A.DIRECTIONS) {
 			Direction transformed = Direction.transform(rotations.getRotation().getMatrix(), direction);
 			boolean isLayer = false;
 			for (CubeData.FaceData identifier : data.identifiers.get(direction)) {
 				emitter.square(transformed, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f);
-				emitter.spriteBake(0, RESOLVED.computeIfAbsent(identifier.identifier, textureGetter), MutableQuadView.BAKE_LOCK_UV);
+				emitter.spriteBake(0, resolved.computeIfAbsent(identifier.identifier, textureGetter), MutableQuadView.BAKE_LOCK_UV);
 				emitter.spriteColor(0, -1, -1, -1, -1);
 				if (identifier.isEmissive) {
 					if (isLayer) {
@@ -123,7 +123,7 @@ public abstract class AbstractBakedModel implements UnbakedModel {
 	}
 
 	public Sprite getParticleSprite() {
-		return RESOLVED.get(this.particles);
+		return resolved.get(this.particles);
 	}
 
 	public ModelOverrideList getOverrides() {

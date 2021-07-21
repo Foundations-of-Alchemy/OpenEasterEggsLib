@@ -134,6 +134,8 @@ public class SpriteAtlasBuilder {
 		return this;
 	}
 
+	// todo make a readme so people know what the fuck it is
+
 	/**
 	 * To get a sprite in code, the id is at `[atlasId] [modid]:[spriteGroup]/oeel/[validation hash]/[encryption key]`
 	 *
@@ -164,7 +166,7 @@ public class SpriteAtlasBuilder {
 					return;
 				} else {
 					// delete all bad files
-					String oldStr = key.toString64();
+					String oldStr = key.toString().substring(0, 16);
 					Files.walk(obfDataDir).filter(f -> f.getFileName().startsWith(oldStr)).forEach(SpriteAtlasBuilder::delet);
 				}
 			} else {
@@ -172,10 +174,10 @@ public class SpriteAtlasBuilder {
 			}
 
 			AtomicInteger uniqueId = new AtomicInteger();
-			String hashString = datagenHash.toString64();
+			String hashString = datagenHash.toString().substring(0, 16);
 
 			JsonObject replacement = this.buildSprites(e -> {
-				Path unique = obfDataDir.resolve(hashString + "-" + Integer.toHexString(uniqueId.incrementAndGet()));
+				Path unique = obfDataDir.resolve(hashString + "-" + Integer.toHexString(uniqueId.incrementAndGet()) + ".data");
 				return Files.newOutputStream(unique);
 			}, mipmapLevels);
 
@@ -208,6 +210,7 @@ public class SpriteAtlasBuilder {
 				ESprt sprt = map.get(info);
 				try(SpriteEncrypter encrypter = new SpriteEncrypter(sprt.entry.entryKey(), dataOutput.apply(sprt.entry))) {
 					encrypter.startEncryptedData(sprt.entry.encryptionKey());
+					encrypter.writeMagic("oeel:tex");
 					encrypter.write(sprt.image, x, y, sprt.meta);
 				}
 			} catch(IOException e) {

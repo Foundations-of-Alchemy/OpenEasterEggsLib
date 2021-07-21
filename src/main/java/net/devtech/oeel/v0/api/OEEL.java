@@ -71,12 +71,6 @@ public final class OEEL implements ModInitializer {
 			RECIPES.accept(resourceManager);
 			manager.registerReloader(resourceManager);
 		});
-		if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-			ReloadableResourceManager manager = (ReloadableResourceManager) MinecraftClient.getInstance().getResourceManager();
-			ObfResourceManager resourceManager = new ObfResourceManager();
-			manager.registerReloader(resourceManager);
-			ObfResourceManager.client = resourceManager;
-		}
 	}
 
 	@Override

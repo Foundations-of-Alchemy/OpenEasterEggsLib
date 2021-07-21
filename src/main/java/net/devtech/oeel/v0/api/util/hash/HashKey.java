@@ -69,8 +69,8 @@ public final class HashKey extends FixedBuffer<HashKey> {
 
 	public HashKey(InputStream stream) throws IOException {
 		byte[] data = SmallBuf.INSTANCE.buffer;
-		stream.read(data, 0, BYTES);
 		int off = SmallBuf.INSTANCE.getSection();
+		Validate.isTrue(stream.read(data, off, BYTES) == BYTES, "EOF on stream!");
 		this.a = SmallBuf.getLong(data, off + 0);
 		this.b = SmallBuf.getLong(data, off + 8);
 		this.c = SmallBuf.getLong(data, off + 16);
@@ -116,7 +116,7 @@ public final class HashKey extends FixedBuffer<HashKey> {
 	@Override
 	public byte getByte(int index) {
 		int modIndex = 56 - (index & 7) * 8;
-		return (byte) (this.getLong(index >> 6) >> modIndex & 0xff);
+		return (byte) (this.getLong(index >> 3) >> modIndex & 0xff);
 	}
 
 	@Override

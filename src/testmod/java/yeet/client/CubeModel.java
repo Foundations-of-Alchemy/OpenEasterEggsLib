@@ -25,7 +25,11 @@ public class CubeModel extends AbstractBakedModel {
 			Function<SpriteIdentifier, Sprite> textureGetter,
 			ModelBakeSettings rotationContainer,
 			Identifier modelId) {
-		AbstractBakedModel.buildCube(rotationContainer, emitter, textureGetter, this.data);
+		try {
+			this.buildCube(rotationContainer, emitter, textureGetter, this.data);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 		return true;
 	}
 }

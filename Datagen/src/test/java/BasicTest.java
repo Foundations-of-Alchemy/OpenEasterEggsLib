@@ -17,6 +17,7 @@ public class BasicTest {
 		EncryptionEntry entry = new EncryptionEntry(key, key.toByteArray());
 		SpriteAtlasBuilder builder = new SpriteAtlasBuilder()
 				.add(entry, BasicTest.class, "/test_texture_1.png", null);
-		builder.buildSprites(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, Path.of("src/testmod/resources/data"), "default", 4);
+		// todo remember to document that u need a assets directory even if u don't use it
+		builder.buildSprites(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, Path.of("src/testmod/resources/data/oeelt"), "default", 4);
 	}
 }

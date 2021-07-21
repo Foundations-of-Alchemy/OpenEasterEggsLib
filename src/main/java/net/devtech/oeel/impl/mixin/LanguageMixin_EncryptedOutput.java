@@ -16,7 +16,7 @@ import net.minecraft.util.Language;
 
 @Mixin(value = TranslationStorage.class, targets = "net/minecraft/util/Language$1")
 public abstract class LanguageMixin_EncryptedOutput extends Language {
-	static final String OEEL_LANG_STARTER = "lang.info.";
+	private static final String OEEL_LANG_STARTER = "lang.info.";
 
 	@Inject(method = "get(Ljava/lang/String;)Ljava/lang/String;", at = @At("RETURN"), cancellable = true)
 	public void onGet(String key, CallbackInfoReturnable<String> cir) throws GeneralSecurityException, IOException {
@@ -26,7 +26,7 @@ public abstract class LanguageMixin_EncryptedOutput extends Language {
 		}
 	}
 
-	static String oeel_decodeLang(String key, UnaryOperator<String> langGetter) throws GeneralSecurityException, IOException {
+	private static String oeel_decodeLang(String key, UnaryOperator<String> langGetter) {
 		if(key.startsWith(OEEL_LANG_STARTER)) {
 			int index = key.lastIndexOf('.');
 			if(index <= OEEL_LANG_STARTER.length()) {

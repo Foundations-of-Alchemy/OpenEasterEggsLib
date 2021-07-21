@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "oeel-test",
+  "id": "oeelt",
   "version": "${version}",
   "entrypoints": {
     "main": [

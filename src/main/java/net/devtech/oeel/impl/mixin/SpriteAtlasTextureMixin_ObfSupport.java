@@ -61,9 +61,11 @@ public abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture
 		this.oeel_encryptedSpriteData.clear();
 		for(ObfTextures.Key meta : ObfTextures.getMetas(manager)) {
 			ObfTextures.AtlasMeta atlasMeta = meta.meta().get(this.id.toString());
-			Sprite.Info info = new Sprite.Info(meta.id(), atlasMeta.atlasWidth, atlasMeta.atlasHeight, AnimationResourceMetadata.EMPTY);
-			this.oeel_encryptedSpriteData.put(info, meta);
-			stitcher.add(info);
+			if(atlasMeta != null) {
+				Sprite.Info info = new Sprite.Info(meta.id(), atlasMeta.atlasWidth, atlasMeta.atlasHeight, AnimationResourceMetadata.EMPTY);
+				this.oeel_encryptedSpriteData.put(info, meta);
+				stitcher.add(info);
+			}
 		}
 	}
 
@@ -103,11 +105,12 @@ public abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture
 			ObfTextures.TotalAtlasSpace space = this.oeel_atlasSpace.get(atlasId);
 			HashId id = HashId.getKey(spriteId);
 			if(id == null) break outer;
+			if(space == null) break outer;
 			Sprite sprite = this.oeel_unencryptSprite(spriteId, id.validation, id.encryption, space);
 			map.put(spriteId, sprite);
 			return sprite;
-		} catch(IllegalArgumentException | NullPointerException e) {
 		} catch(GeneralSecurityException | IOException e) {
+			e.printStackTrace();
 			throw Validate.rethrow(e);
 		}
 

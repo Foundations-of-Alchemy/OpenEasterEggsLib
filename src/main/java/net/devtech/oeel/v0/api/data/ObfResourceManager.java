@@ -1,11 +1,12 @@
 package net.devtech.oeel.v0.api.data;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import com.google.common.collect.HashMultimap;
@@ -14,12 +15,14 @@ import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.v0.api.access.ByteDeserializer;
 import net.devtech.oeel.v0.api.util.IdentifierPacker;
 import net.devtech.oeel.v0.api.util.OEELEncrypting;
+import net.devtech.oeel.v0.api.util.func.Iter;
 import net.devtech.oeel.v0.api.util.func.UFunc;
 import net.devtech.oeel.v0.api.util.func.UPred;
 import net.devtech.oeel.v0.api.util.hash.HashKey;
 
-import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.ResourcePack;
+import net.minecraft.resource.ResourceType;
 import net.minecraft.resource.SinglePreparationResourceReloader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
@@ -55,31 +58,43 @@ public class ObfResourceManager extends SinglePreparationResourceReloader<Multim
 
 	public <T> Iterable<T> decryptOnce(HashKey validationKey, byte[] key, ByteDeserializer<T> deserializer) {
 		long magic = IdentifierPacker.pack(deserializer.magic());
-		return () -> this.encryptedData.get(validationKey)
-				             .stream()
-				             .map(b -> OEELEncrypting.decryptStream(b, key)) // decrypt
-				             .filter(UPred.of(s -> s.readLong() == magic)) // validate magic
+		return () -> this.encryptedData.get(validationKey).stream().map(b -> OEELEncrypting.decryptStream(key, b)) // decrypt
+				             .filter(UPred.of(s -> {
+					             long b = s.readLong();
+					             return b == magic; // validate magic
+				             }))
 				             .map(UFunc.of(i -> {
 					             T value = deserializer.newInstance();
 					             deserializer.read(value, i, validationKey);
 					             return value;
-				             }))
-				             .iterator();
+				             })).iterator();
+	}
+
+	public static Map<Identifier, InputStream> findResources(ResourceType type,
+			ResourceManager manager,
+			String startingPath,
+			Predicate<String> pathPredicate) {
+		Map<Identifier, InputStream> map = new HashMap<>();
+		for(ResourcePack pack : Iter.iter(manager::streamResourcePacks)) {
+			for(String namespace : pack.getNamespaces(type)) {
+				for(Identifier resource : pack.findResources(type, namespace, startingPath, Integer.MAX_VALUE, pathPredicate)) {
+					try {
+						map.put(resource, pack.open(type, resource));
+					} catch(IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+		}
+		return map;
 	}
 
 	@Override
 	protected Multimap<HashKey, byte[]> prepare(ResourceManager manager, Profiler profiler) {
 		Multimap<HashKey, byte[]> encryptedData = HashMultimap.create();
-		for(Identifier resourceId : manager.findResources("obf_rss/", s -> s.endsWith(".data"))) {
+		for(InputStream resource : findResources(ResourceType.SERVER_DATA, manager, "obf_rss/", s -> s.endsWith(".data")).values()) {
 			try {
-				try(Resource resource = manager.getResource(resourceId)) {
-					if(resource != null) {
-						InputStream stream = resource.getInputStream();
-						encryptedData.put(new HashKey(stream), stream.readAllBytes());
-					} else {
-						throw new FileNotFoundException(resourceId + "");
-					}
-				}
+				encryptedData.put(new HashKey(resource), resource.readAllBytes());
 			} catch(IOException e) {
 				throw Validate.rethrow(e);
 			}
