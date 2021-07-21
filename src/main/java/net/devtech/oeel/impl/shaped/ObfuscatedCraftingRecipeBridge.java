@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 import io.github.astrarre.itemview.v0.fabric.ItemKey;
 import io.github.astrarre.util.v0.api.Validate;
-import net.devtech.oeel.impl.OEELInternal;
+import net.devtech.oeel.impl.OEELImpl;
 import net.devtech.oeel.v0.api.util.EncryptionEntry;
 import net.devtech.oeel.v0.api.OEEL;
 import net.devtech.oeel.v0.api.access.HashFunction;
@@ -33,7 +33,7 @@ import net.minecraft.world.World;
 public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 	public static final Identifier SHAPELESS = new Identifier("oeel:shapeless");
 	public static final Identifier SHAPED = new Identifier("oeel:shaped");
-	public static final RecipeSerializer<?> SERIALIZER = OEELInternal.bridgeSerializer(ObfuscatedCraftingRecipeBridge::new);
+	public static final RecipeSerializer<?> SERIALIZER = OEELImpl.bridgeSerializer(ObfuscatedCraftingRecipeBridge::new);
 
 	private static final ItemStack STACK = new ItemStack(Items.STONE);
 
@@ -46,7 +46,6 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 	 */
 	public static ItemStack craft(boolean testingForEmpty, Function<HashFunction<ItemKey>, EncryptionEntry> hash)
 			throws GeneralSecurityException, IOException {
-		// perhaps instead just iterate through all item info substitutions
 		for(Map.Entry<Identifier, HashFunction<ItemKey>> entry : HashFunctionManager.ITEM_COMP.entrySet()) {
 			HashFunction<ItemKey> function = entry.getValue();
 			EncryptionEntry test = hash.apply(function);
@@ -114,7 +113,7 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 			for(int x = 0; x < width; x++) {
 				for(int y = 0; y < height; y++) {
 					ItemStack stack = inventory.getStack((offX + x) + (offY + y) * matrixWidth);
-					hashFunction.hash(hasher, ItemKey.of(stack));
+					hashFunction.hashOrThrow(hasher, ItemKey.of(stack));
 				}
 			}
 
@@ -147,8 +146,8 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 			ItemStack stack = inventory.getStack(i);
 			if(!stack.isEmpty()) {
 				try(SHA256Hasher hasher = SHA256Hasher.getPooled()) {
-					hashFunction.hash(hasher, ItemKey.of(stack));
-					items.add(hasher.hashCompact());
+					hashFunction.hashOrThrow(hasher, ItemKey.of(stack));
+					items.add(hasher.hashC());
 				}
 			}
 		}
@@ -188,8 +187,8 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 
 	public static ItemStack craft(CraftingInventory inventory, boolean testingForEmpty) {
 		try {
-			for(int width = 1; width <= 3; width++) {
-				for(int height = 1; height <= 3; height++) {
+			for(int width = 1; width <= inventory.getWidth(); width++) {
+				for(int height = 1; height <= inventory.getHeight(); height++) {
 					ItemStack stack = craftShaped(SHAPED, inventory, inventory.getWidth(), inventory.getHeight(), width, height, testingForEmpty);
 					if(!stack.isEmpty()) {
 						return stack;

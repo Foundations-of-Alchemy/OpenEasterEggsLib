@@ -11,7 +11,7 @@ public class Reg<T> {
 	protected final Map<Identifier, T> map = new HashMap<>();
 
 	public void register(Identifier id, T val) {
-		Validate.notNull(this.map.put(id, val), "replaced entry " + id + ", try-catch if intended");
+		Validate.isNull(this.map.put(id, val), "replaced entry " + id + ", try-catch if intended");
 	}
 
 	public T get(Identifier id) {

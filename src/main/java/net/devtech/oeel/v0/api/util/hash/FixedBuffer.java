@@ -1,11 +1,10 @@
 package net.devtech.oeel.v0.api.util.hash;
 
-import java.beans.Encoder;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Base64;
 
-import net.devtech.oeel.impl.OEELInternal;
+import net.devtech.oeel.impl.OEELImpl;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class FixedBuffer<Self extends FixedBuffer<Self>> implements Comparable<Self> {
@@ -19,8 +18,8 @@ public abstract class FixedBuffer<Self extends FixedBuffer<Self>> implements Com
 		builder.ensureCapacity(builder.capacity() + 128);
 		for(int i = 0; i < this.bytes(); i++) {
 			byte b = this.getByte(i);
-			builder.append(OEELInternal.HEX_ARRAY_C[(b & 0xF0) >>> 4]);
-			builder.append(OEELInternal.HEX_ARRAY_C[b & 0x0F]);
+			builder.append(OEELImpl.HEX_ARRAY_C[(b & 0xF0) >>> 4]);
+			builder.append(OEELImpl.HEX_ARRAY_C[b & 0x0F]);
 		}
 	}
 

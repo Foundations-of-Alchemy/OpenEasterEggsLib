@@ -5,7 +5,7 @@ import java.util.function.Function;
 import io.github.astrarre.access.v0.api.FunctionAccess;
 import io.github.astrarre.access.v0.fabric.helper.ItemAccessHelper;
 import io.github.astrarre.util.v0.api.Validate;
-import net.devtech.oeel.impl.OEELInternal;
+import net.devtech.oeel.impl.OEELImpl;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
@@ -17,7 +17,7 @@ public interface ItemNameOverrideEvent {
 	/**
 	 * return null
 	 */
-	FunctionAccess<ItemStack, Text> EVENT = new FunctionAccess<>(OEELInternal.id2("item_lang_override"));
+	FunctionAccess<ItemStack, Text> EVENT = new FunctionAccess<>(OEELImpl.id2("item_lang_override"));
 	ItemAccessHelper<Function<ItemStack, Text>> ITEM_FILTER = ItemAccessHelper.create(EVENT, function -> stack -> function.apply(stack).apply(stack), ItemStack::getItem, s -> null);
 
 	Void _STATIC = Util.make(() -> {

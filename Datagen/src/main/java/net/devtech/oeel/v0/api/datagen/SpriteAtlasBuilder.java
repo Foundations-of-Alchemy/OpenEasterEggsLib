@@ -24,9 +24,10 @@ import java.util.function.Consumer;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.astrarre.util.v0.api.Validate;
-import net.devtech.oeel.impl.OEELInternal;
+import net.devtech.oeel.impl.OEELImpl;
 import net.devtech.oeel.v0.api.util.EncryptionEntry;
 import net.devtech.oeel.v0.api.util.func.UFunc;
 import net.devtech.oeel.v0.api.util.hash.HashKey;
@@ -59,7 +60,7 @@ public class SpriteAtlasBuilder {
 
 	public SpriteAtlasBuilder add(EncryptionEntry key, File file, @Nullable JsonObject meta) {
 		this.spriteCacheHelper.putLong(file.lastModified());
-		this.spriteCacheHelper.putString(file.getAbsolutePath(), StandardCharsets.UTF_8);
+		this.spriteCacheHelper.putString(file.getPath(), StandardCharsets.UTF_8);
 		this.images.add(new Sprt<>(key, file, ImageIO::read, meta));
 		return this;
 	}
@@ -67,7 +68,7 @@ public class SpriteAtlasBuilder {
 	public SpriteAtlasBuilder add(EncryptionEntry key, Path file, @Nullable JsonObject meta) {
 		try {
 			this.spriteCacheHelper.putLong(Files.getLastModifiedTime(file).toMillis());
-			this.spriteCacheHelper.putString(file.toAbsolutePath().toString(), StandardCharsets.UTF_8);
+			this.spriteCacheHelper.putString(file.toString(), StandardCharsets.UTF_8);
 		} catch(IOException e) {
 			throw Validate.rethrow(e);
 		}
@@ -134,7 +135,11 @@ public class SpriteAtlasBuilder {
 		return this;
 	}
 
-	// todo make a readme so people know what the fuck it is
+	HashKey key;
+	public HashKey getHash() {
+		if(this.key == null) this.key = this.spriteCacheHelper.hashC();
+		return this.key;
+	}
 
 	/**
 	 * To get a sprite in code, the id is at `[atlasId] [modid]:[spriteGroup]/oeel/[validation hash]/[encryption key]`
@@ -143,51 +148,28 @@ public class SpriteAtlasBuilder {
 	 * @param modDataDirectory all unified obfuscated data (atm, everything except lang files) goes in the mods data directory
 	 * @param mipmapLevels default is 4 in mc I think
 	 */
-	public void buildSprites(Identifier atlasId, Path modDataDirectory, String spriteGroupName, int mipmapLevels) {
+	public List<Path> buildSprites(Identifier atlasId, Path modDataDirectory, String spriteGroupName, int mipmapLevels) {
 		Path spriteAtlasPath = modDataDirectory.resolve("obf_atlas").resolve(spriteGroupName + ".json");
 		try {
-			JsonObject currentAtlasMeta;
-			if(Files.exists(spriteAtlasPath)) {
-				try(BufferedReader reader = Files.newBufferedReader(spriteAtlasPath)) {
-					currentAtlasMeta = OEELInternal.GSON.fromJson(reader, JsonObject.class);
-				}
-			} else {
-				currentAtlasMeta = new JsonObject();
-			}
-
-			JsonObject object = currentAtlasMeta.getAsJsonObject(atlasId.toString());
-			HashKey datagenHash = this.spriteCacheHelper.hashCompact();
+			JsonObject currentAtlasMeta = from(spriteAtlasPath);
 
 			Path obfDataDir = modDataDirectory.resolve("obf_rss");
-
-			if(Files.exists(obfDataDir) && object != null && object.has("datagenHash")) {
-				HashKey key = new HashKey(object.getAsJsonPrimitive("datagenHash").getAsString());
-				if(key.equals(datagenHash)) {
-					return;
-				} else {
-					// delete all bad files
-					String oldStr = key.toString().substring(0, 16);
-					Files.walk(obfDataDir).filter(f -> f.getFileName().startsWith(oldStr)).forEach(SpriteAtlasBuilder::delet);
-				}
-			} else {
-				Files.createDirectories(obfDataDir);
-			}
-
 			AtomicInteger uniqueId = new AtomicInteger();
-			String hashString = datagenHash.toString().substring(0, 16);
-
+			List<Path> paths = new ArrayList<>();
 			JsonObject replacement = this.buildSprites(e -> {
-				Path unique = obfDataDir.resolve(hashString + "-" + Integer.toHexString(uniqueId.incrementAndGet()) + ".data");
+				SHA256Hasher hasher = SHA256Hasher.getPooled();
+				hasher.putIdentifier(atlasId);
+				hasher.putString(spriteGroupName, StandardCharsets.UTF_8);
+				hasher.putInt(uniqueId.incrementAndGet());
+				String str = hasher.hashC().toString();
+				Path unique = obfDataDir.resolve(str.substring(0, 16) + ".data");
+				paths.add(unique);
+				Files.createDirectories(unique.getParent());
 				return Files.newOutputStream(unique);
 			}, mipmapLevels);
-
-			replacement.addProperty("datagenHash", hashString);
 			currentAtlasMeta.add(atlasId.toString(), replacement);
-
-			Files.createDirectories(spriteAtlasPath.getParent());
-			try(BufferedWriter writer = Files.newBufferedWriter(spriteAtlasPath)) {
-				OEELInternal.GSON.toJson(currentAtlasMeta, writer);
-			}
+			write(currentAtlasMeta, spriteAtlasPath);
+			return paths;
 		} catch(IOException e) {
 			throw Validate.rethrow(e);
 		}
@@ -241,4 +223,19 @@ public class SpriteAtlasBuilder {
 	record Sprt<T>(EncryptionEntry key, T val, UFunc<T, BufferedImage> image, JsonObject meta) {}
 
 	record ESprt(EncryptionEntry entry, BufferedImage image, JsonObject meta) {}
+
+	public static JsonObject from(Path path) {
+		try(BufferedReader reader = Files.newBufferedReader(path)) {
+			return OEELImpl.GSON.fromJson(reader, JsonObject.class);
+		} catch(IOException e) {
+			return new JsonObject();
+		}
+	}
+
+	public static void write(JsonObject object, Path path) throws IOException {
+		Files.createDirectories(path.getParent());
+		try(BufferedWriter writer = Files.newBufferedWriter(path)) {
+			OEELImpl.GSON.toJson(object, writer);
+		}
+	}
 }

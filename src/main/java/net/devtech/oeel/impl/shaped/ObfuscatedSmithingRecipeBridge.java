@@ -7,7 +7,7 @@ import java.util.Map;
 
 import io.github.astrarre.itemview.v0.fabric.ItemKey;
 import io.github.astrarre.util.v0.api.Validate;
-import net.devtech.oeel.impl.OEELInternal;
+import net.devtech.oeel.impl.OEELImpl;
 import net.devtech.oeel.v0.api.util.hash.BiHasher;
 
 import net.minecraft.enchantment.Enchantment;
@@ -24,7 +24,7 @@ import net.minecraft.world.World;
 
 public class ObfuscatedSmithingRecipeBridge extends SmithingRecipe {
 	public static final Identifier ID = new Identifier("oeel:obf_smithing");
-	public static final RecipeSerializer<?> SERIALIZER = OEELInternal.bridgeSerializer(ObfuscatedSmithingRecipeBridge::new);
+	public static final RecipeSerializer<?> SERIALIZER = OEELImpl.bridgeSerializer(ObfuscatedSmithingRecipeBridge::new);
 	public static final ItemStack ICON;
 
 	static {
@@ -57,7 +57,7 @@ public class ObfuscatedSmithingRecipeBridge extends SmithingRecipe {
 					hasher.putIdentifier(ID);
 					for(int i = 0; i < 2; i++) {
 						ItemStack stack = inventory.getStack(i);
-						function.hash(hasher, ItemKey.of(stack));
+						function.hashOrThrow(hasher, ItemKey.of(stack));
 					}
 					return hasher.hash();
 				}

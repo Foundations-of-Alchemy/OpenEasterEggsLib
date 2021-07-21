@@ -4,7 +4,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import net.devtech.oeel.impl.OEELInternal;
+import net.devtech.oeel.impl.OEELImpl;
 import net.devtech.oeel.v0.api.util.IdentifierPacker;
 import net.devtech.oeel.v0.api.util.hash.HashKey;
 
@@ -28,7 +28,7 @@ public class AbstractEncrypter<Self extends AbstractEncrypter<Self>> extends Dat
 	}
 
 	public Self startEncryptedData(byte[] encryptionKey) {
-		this.out = OEELInternal.encryptStream(encryptionKey, this.out);
+		this.out = OEELImpl.encryptStream(encryptionKey, this.out);
 		return this.t;
 	}
 

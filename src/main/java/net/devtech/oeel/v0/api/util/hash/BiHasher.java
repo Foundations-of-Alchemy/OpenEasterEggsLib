@@ -82,14 +82,14 @@ public class BiHasher extends AbstractHasher implements Closeable {
 
 	public EncryptionEntry hash() {
 		if(this.hasherB == null) {
-			return new EncryptionEntry(this.hasherA.hashCompact(), null);
+			return new EncryptionEntry(this.hasherA.hashC(), null);
 		} else {
-			return new EncryptionEntry(this.hasherA.hashCompact(), this.hasherB.hash());
+			return new EncryptionEntry(this.hasherA.hashC(), this.hasherB.hash());
 		}
 	}
 
 	public HashKey hashA() {
-		return this.hasherA.hashCompact();
+		return this.hasherA.hashC();
 	}
 
 }

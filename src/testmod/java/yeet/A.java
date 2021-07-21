@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import com.google.common.hash.HashCode;
+import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.v0.api.util.EncryptionEntry;
 import net.devtech.oeel.v0.api.util.HashId;
 import net.devtech.oeel.v0.api.util.OEELEncrypting;
@@ -29,11 +30,14 @@ public class A implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		ModelLoadingRegistry.INSTANCE.registerResourceProvider(r -> new TestModelProvider());
-		HashKey key = new HashKey(0xABCEDF0123456789L, 0xFEDBAC1234567890L, 0xAAAAAAAAAAAAAAAAL, 0xFFFFFFFFFFFFFFFFL);
-		EncryptionEntry entry = new EncryptionEntry(key, key.toByteArray());
-		var spriteId = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, HashId.create(new Identifier("oeelt:default"), entry));
-		TestModelProvider.add(new CubeModel(spriteId, CubeData.withAll(spriteId)), "item/test_item");
+		if(Boolean.getBoolean("datagen.oeelt")) {
+			try {
+				new Datagen().onInitialize();
+				System.exit(0);
+			} catch(IOException e) {
+				throw Validate.rethrow(e);
+			}
+		}
 
 		Registry.register(Registry.ITEM, id("test_item"), new Item(new Item.Settings()));
 	}

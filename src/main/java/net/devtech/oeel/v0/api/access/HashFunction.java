@@ -19,4 +19,12 @@ public interface HashFunction<T> {
 	}
 
 	void hash(Hasher hasher, T val);
+
+	default void hashOrThrow(Hasher hasher, T val) {
+		long version = hasher.getVersion();
+		this.hash(hasher, val);
+		if(version == hasher.getVersion()) {
+			throw new IllegalStateException("unable to hash " + val);
+		}
+	}
 }

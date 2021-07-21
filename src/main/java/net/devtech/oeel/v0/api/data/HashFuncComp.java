@@ -46,7 +46,7 @@ public class HashFuncComp<T, E> {
 		}
 
 		HashFunction<T> sub = HashFunction.<T>combine().combine(hasher);
-		if(this.map.put(id, sub) instanceof HasherRef i) {
+		if(this.map.put(id, sub) instanceof HasherRef<T> i) {
 			i.hasher = sub;
 		}
 		return sub;
@@ -132,14 +132,16 @@ public class HashFuncComp<T, E> {
 
 	public HashFunction<T> forId(Identifier id) {
 		if(id == null) return null;
-		return this.map.computeIfAbsent(id, HasherRef::new);
+		return this.map.computeIfAbsent(id, id1 -> new HasherRef<>(map, id1));
 	}
 
-	private class HasherRef implements HashFunction<T> {
+	private static class HasherRef<T> implements HashFunction<T> {
+		private final Map<Identifier, HashFunction<T>> map;
 		private final Identifier id;
 		private HashFunction<T> hasher;
 
-		public HasherRef(Identifier id) {
+		public HasherRef(Map<Identifier, HashFunction<T>> map, Identifier id) {
+			this.map = map;
 			this.id = id;
 		}
 
@@ -147,7 +149,7 @@ public class HashFuncComp<T, E> {
 		public void hash(Hasher hasher, T val) {
 			HashFunction<T> hash = this.hasher;
 			if(hash == null) {
-				HashFunction<T> function = HashFuncComp.this.map.get(this.id);
+				HashFunction<T> function = map.get(this.id);
 				if(function == this) {
 					function = null;
 				}

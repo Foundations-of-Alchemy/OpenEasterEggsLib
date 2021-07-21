@@ -30,7 +30,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 @SuppressWarnings("UnstableApiUsage")
-public class OEELInternal {
+public class OEELImpl {
 	public static final String MODID = "oeel";
 	public static final byte[] HEX_ARRAY = "0123456789abcdef".getBytes(StandardCharsets.US_ASCII);
 	public static final char[] HEX_ARRAY_C = "0123456789abcdef".toCharArray();

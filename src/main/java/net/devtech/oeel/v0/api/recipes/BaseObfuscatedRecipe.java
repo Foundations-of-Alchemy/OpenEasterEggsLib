@@ -21,7 +21,7 @@ import net.minecraft.util.Identifier;
  * A base obfuscated recipe
  */
 public class BaseObfuscatedRecipe {
-	public static final ByteDeserializer<BaseObfuscatedRecipe> SERIALIZER = new Deserializer<>(BaseObfuscatedRecipe::new, "oeel/obf_r");
+	public static final ByteDeserializer<BaseObfuscatedRecipe> SERIALIZER = new Deserializer<>(BaseObfuscatedRecipe::new, "oeel:obf_r");
 	protected HashFunction<ItemKey> item;
 	protected HashFunction<Entity> entity;
 	protected HashFunction<BlockData> block;
@@ -91,29 +91,6 @@ public class BaseObfuscatedRecipe {
 		return this.output;
 	}
 
-	public static Identifier readIdentifier(DataInputStream buffer) throws IOException {
-		long packedName = buffer.readLong();
-		if(packedName == 0) {
-			return null;
-		}
-		long packedPath = buffer.readLong();
-		String name, path;
-		if(packedName != -1) {
-			name = IdentifierPacker.unpack(packedName);
-		} else {
-			name = buffer.readUTF();
-		}
-
-		if(packedPath != -1) {
-			path = IdentifierPacker.unpack(packedPath);
-		} else {
-			path = buffer.readUTF();
-		}
-
-		return new Identifier(name, path);
-	}
-
-
 	private static class Deserializer<T extends BaseObfuscatedRecipe> implements ByteDeserializer<T> {
 		public final Supplier<T> newInstance;
 		public final String magic;
@@ -133,12 +110,17 @@ public class BaseObfuscatedRecipe {
 			return this.newInstance.get();
 		}
 
+		static Identifier rni(String str) {
+			if(str.isEmpty()) return null;
+			return new Identifier(str);
+		}
+
 		@Override
 		public void read(BaseObfuscatedRecipe instance, DataInputStream buffer, HashKey inputHash) throws IOException {
-			instance.itemHashFunctionId = readIdentifier(buffer);
-			instance.blockHashFunctionId = readIdentifier(buffer);
-			instance.entityHashFunctionId = readIdentifier(buffer);
-			instance.output = buffer.readNBytes(buffer.readInt());
+			instance.itemHashFunctionId = rni(buffer.readUTF());
+			instance.blockHashFunctionId = rni(buffer.readUTF());
+			instance.entityHashFunctionId = rni(buffer.readUTF());
+			instance.output = buffer.readAllBytes();
 		}
 	}
 }

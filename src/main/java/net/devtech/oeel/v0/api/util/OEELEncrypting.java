@@ -2,16 +2,13 @@ package net.devtech.oeel.v0.api.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 
 import javax.crypto.Cipher;
 
 import io.github.astrarre.util.v0.api.Validate;
-import net.devtech.oeel.impl.OEELInternal;
-import org.jetbrains.annotations.NotNull;
+import net.devtech.oeel.impl.OEELImpl;
 
 public class OEELEncrypting {
 	/**
@@ -36,15 +33,15 @@ public class OEELEncrypting {
 		byte[] hexChars = new byte[bytes.length * 2];
 		for(int j = 0; j < bytes.length; j++) {
 			int v = bytes[j] & 0xFF;
-			hexChars[j * 2] = OEELInternal.HEX_ARRAY[v >>> 4];
-			hexChars[j * 2 + 1] = OEELInternal.HEX_ARRAY[v & 0x0F];
+			hexChars[j * 2] = OEELImpl.HEX_ARRAY[v >>> 4];
+			hexChars[j * 2 + 1] = OEELImpl.HEX_ARRAY[v & 0x0F];
 		}
 		return new String(hexChars, StandardCharsets.UTF_8);
 	}
 
 	public static byte[] decrypt(byte[] key, byte[] data) {
 		try {
-			return OEELInternal.crypt(key, data, Cipher.DECRYPT_MODE);
+			return OEELImpl.crypt(key, data, Cipher.DECRYPT_MODE);
 		} catch(GeneralSecurityException e) {
 			throw Validate.rethrow(e);
 		}
@@ -52,7 +49,7 @@ public class OEELEncrypting {
 
 	public static byte[] encrypt(byte[] key, byte[] data) {
 		try {
-			return OEELInternal.crypt(key, data, Cipher.ENCRYPT_MODE);
+			return OEELImpl.crypt(key, data, Cipher.ENCRYPT_MODE);
 		} catch(GeneralSecurityException e) {
 			throw Validate.rethrow(e);
 		}
@@ -60,7 +57,7 @@ public class OEELEncrypting {
 
 	public static DataInputStream decryptStream(byte[] key, byte[] data) {
 		try {
-			return new DataInputStream(OEELInternal.decryptStream(key, new ByteArrayInputStream(data)));
+			return new DataInputStream(OEELImpl.decryptStream(key, new ByteArrayInputStream(data)));
 		} catch(GeneralSecurityException e) {
 			throw new RuntimeException(e);
 		}

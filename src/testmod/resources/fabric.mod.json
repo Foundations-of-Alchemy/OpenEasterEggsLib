@@ -5,6 +5,9 @@
   "entrypoints": {
     "main": [
       "yeet.A"
+    ],
+    "client": [
+      "yeet.AClient"
     ]
   }
 }

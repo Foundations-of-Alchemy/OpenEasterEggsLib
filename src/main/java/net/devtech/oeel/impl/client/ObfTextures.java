@@ -2,19 +2,17 @@ package net.devtech.oeel.impl.client;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.JsonObject;
 import io.github.astrarre.util.v0.api.Validate;
-import net.devtech.oeel.impl.OEELInternal;
+import net.devtech.oeel.impl.OEELImpl;
 import net.devtech.oeel.v0.api.access.ByteDeserializer;
 import net.devtech.oeel.v0.api.data.ObfResourceManager;
 import net.devtech.oeel.v0.api.util.hash.HashKey;
@@ -37,7 +35,7 @@ public class ObfTextures {
 
 		ObfResourceManager.findResources(ResourceType.SERVER_DATA, manager, "obf_atlas", s -> s.endsWith(".json")).forEach((identifier, stream) -> {
 			try(Reader reader = new InputStreamReader(stream)) {
-				Map<String, AtlasMeta> meta = OEELInternal.GSON.fromJson(reader, ATLAS_TYPE);
+				Map<String, AtlasMeta> meta = OEELImpl.GSON.fromJson(reader, ATLAS_TYPE);
 				String path = identifier.getPath();
 				Identifier id = new Identifier(identifier.getNamespace(), path.substring(10, path.length() - 5));
 				newMetas.add(new Key(id, meta));
@@ -84,7 +82,7 @@ public class ObfTextures {
 			instance.offY = buffer.readInt();
 			instance.width = buffer.readInt();
 			instance.height = buffer.readInt();
-			instance.meta = OEELInternal.GSON.fromJson(buffer.readUTF(), JsonObject.class);
+			instance.meta = OEELImpl.GSON.fromJson(buffer.readUTF(), JsonObject.class);
 			instance.data = buffer.readAllBytes();
 		}
 	}

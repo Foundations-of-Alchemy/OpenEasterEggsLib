@@ -7,7 +7,7 @@ import java.util.Map;
 
 import io.github.astrarre.itemview.v0.fabric.ItemKey;
 import io.github.astrarre.util.v0.api.Validate;
-import net.devtech.oeel.impl.OEELInternal;
+import net.devtech.oeel.impl.OEELImpl;
 import net.devtech.oeel.v0.api.util.hash.BiHasher;
 
 import net.minecraft.enchantment.Enchantment;
@@ -25,7 +25,7 @@ import net.minecraft.world.World;
 
 public class ObfuscatedStonecuttingRecipeBridge extends StonecuttingRecipe {
 	public static final Identifier ID = new Identifier("oeel:obf_stonecutting");
-	public static final RecipeSerializer<?> SERIALIZER = OEELInternal.bridgeSerializer(ObfuscatedStonecuttingRecipeBridge::new);
+	public static final RecipeSerializer<?> SERIALIZER = OEELImpl.bridgeSerializer(ObfuscatedStonecuttingRecipeBridge::new);
 	public static final ItemStack ICON;
 
 	static {
@@ -52,7 +52,7 @@ public class ObfuscatedStonecuttingRecipeBridge extends StonecuttingRecipe {
 				try(BiHasher hasher = BiHasher.createDefault(testingForEmpty)) {
 					hasher.putIdentifier(ID);
 					ItemStack stack = inventory.getStack(0);
-					function.hash(hasher, ItemKey.of(stack));
+					function.hashOrThrow(hasher, ItemKey.of(stack));
 					// oh fuck I may need to also have amount idk
 					return hasher.hash();
 				}

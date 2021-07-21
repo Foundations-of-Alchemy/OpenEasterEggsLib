@@ -11,9 +11,10 @@ import io.github.astrarre.util.v0.api.Validate;
 import org.apache.commons.io.output.NullOutputStream;
 
 public class SHA256Hasher extends AbstractHasher implements AutoCloseable {
+	static final int POOL_SIZE = 128, POOL_MASK = POOL_SIZE - 1;
 	static final OutputStream NULL = NullOutputStream.NULL_OUTPUT_STREAM;
 	static final AtomicInteger INDEX = new AtomicInteger();
-	static final AtomicReferenceArray<SHA256Hasher> POOL = new AtomicReferenceArray<>(128);
+	static final AtomicReferenceArray<SHA256Hasher> POOL = new AtomicReferenceArray<>(POOL_SIZE);
 
 	static final MessageDigest SHA_256;
 
@@ -53,7 +54,7 @@ public class SHA256Hasher extends AbstractHasher implements AutoCloseable {
 	}
 
 	public static SHA256Hasher getPooled() {
-		int index = INDEX.incrementAndGet() & 255;
+		int index = INDEX.incrementAndGet() & POOL_MASK;
 		SHA256Hasher hasher = POOL.getAndSet(index, null);
 		if(hasher == null) {
 			return new SHA256Hasher(index);
@@ -65,7 +66,7 @@ public class SHA256Hasher extends AbstractHasher implements AutoCloseable {
 	/**
 	 * resets this instance once called, so it can be re-used
 	 */
-	public HashKey hashCompact() {
+	public HashKey hashC() {
 		return new HashKey(this.digest);
 	}
 
