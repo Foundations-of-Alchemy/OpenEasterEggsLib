@@ -17,8 +17,9 @@ Comes with a data-gen library. I would recommend making a datagen sourceset and 
 **Can't you just dump all the recipes at runtime?**: No, the encryption key is derived from the inputs of the recipe, so to know the output of the recipe, you must know the input items. The way the recipe is validated is through the validation key, which is a seperate hash of the inputs of the recipe. This diagram should hopefully clear it up:
 ![img](https://github.com/Foundations-of-Alchemy/OpenEasterEggsLib/blob/master/reade/img.png?raw=true)
 
-**Why?**: It's in the name, for easter eggs, but more importantly it's part of [foa](https://gist.github.com/Devan-Kerman/4e7a5e6a44e08281d8bfef8e56dab61f).
+**Can't you just brute force all the recipes?**: No, NBT is infinitely variable. But even without NBT, there are around 1,000^9 combinations in the crafting table for *just shaped recipes with **only** vanilla items*. So, good luck. If you're still confident, there will be a tech demo / challenge soon.
 
+**Why?**: It's in the name, for easter eggs, but more importantly it's part of [foa](https://gist.github.com/Devan-Kerman/4e7a5e6a44e08281d8bfef8e56dab61f).
 
 **This was NOT made for paranoid artists/developers**\
 If you're using this mod for DRM, the licence allows you to but, fuck you.
