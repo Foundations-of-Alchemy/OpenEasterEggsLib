@@ -45,9 +45,9 @@ public final class OEEL implements ModInitializer {
 		Registry.register(Registry.RECIPE_SERIALIZER, ObfuscatedStonecuttingRecipeBridge.ID, ObfuscatedStonecuttingRecipeBridge.SERIALIZER);
 		Registry.register(Registry.RECIPE_SERIALIZER, ObfuscatedSmithingRecipeBridge.ID, ObfuscatedSmithingRecipeBridge.SERIALIZER);
 		ServerResourceManagerLoadEvent.POST_TAG.andThen((serverResourceManager, manager) -> {
-			manager.registerReloader(new HashFunctionManager<>("ihshr",HashFunctionManager.ITEM_COMP));
-			manager.registerReloader(new HashFunctionManager<>("bhshr",HashFunctionManager.BLOCK_COMP));
-			manager.registerReloader(new HashFunctionManager<>("ehshr",HashFunctionManager.ENTITY_COMP));
+			manager.registerReloader(new HashFunctionManager<>("ihshr", HashFunctionManager.ITEM_COMP));
+			manager.registerReloader(new HashFunctionManager<>("bhshr", HashFunctionManager.BLOCK_COMP));
+			manager.registerReloader(new HashFunctionManager<>("ehshr", HashFunctionManager.ENTITY_COMP));
 			ObfResourceManager resourceManager = new ObfResourceManager();
 			RECIPES.accept(resourceManager);
 			manager.registerReloader(resourceManager);

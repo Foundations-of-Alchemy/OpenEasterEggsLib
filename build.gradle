@@ -27,8 +27,6 @@ allprojects {
     version = project.mod_version
     group = project.maven_group
 
-
-
     repositories {
         maven {
             url 'https://storage.googleapis.com/devan-maven/'
@@ -82,8 +80,16 @@ allprojects {
 
         // select the repositories you want to publish to
         repositories {
-            // uncomment to publish to the local maven
-            // mavenLocal()
+            maven {
+                def mavenUrl = project.hasProperty('maven_url') ? project.property('maven_url') : ""
+                url mavenUrl
+                if (mavenUrl.startsWith("http")) {
+                    credentials {
+                        username project.hasProperty('maven_username') ? project.property('maven_username') : ""
+                        password project.hasProperty('maven_password') ? project.property('maven_password') : ""
+                    }
+                }
+            }
         }
     }
 }
