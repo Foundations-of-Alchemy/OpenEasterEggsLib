@@ -90,6 +90,7 @@ public class ClassEncrypter {
 				daos.writeInt(dependencies);
 				for(String dependency : key.dependencies) {
 					EncryptionEntry dep = this.classpath.get(dependency);
+					daos.writeUTF(dependency);
 					dep.write(daos);
 				}
 				daos.write(key.bytecode);

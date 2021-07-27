@@ -23,7 +23,9 @@ public class SandboxImpl extends ClassLoader implements Sandbox {
 		ClassReader reader = new ClassReader(buf, off, len);
 		reader.accept(visitor, 0);
 		byte[] code = writer.toByteArray();
-		String qualifiedName = reader.getClassName().replace('/', '.');
+		String internalName = reader.getClassName();
+		this.allow(internalName);
+		String qualifiedName = internalName.replace('/', '.');
 		return this.defineClass(qualifiedName, code, 0, code.length);
 	}
 }

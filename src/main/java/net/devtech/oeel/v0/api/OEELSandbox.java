@@ -1,6 +1,9 @@
 package net.devtech.oeel.v0.api;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
@@ -17,6 +20,8 @@ import net.devtech.oeel.v0.api.util.func.UFunc;
 import net.devtech.oeel.v0.api.util.hash.HashKey;
 import net.devtech.sandbox.impl.SandboxImpl;
 import net.devtech.sandbox.v0.api.Sandbox;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 import oshi.util.tuples.Pair;
 
@@ -30,6 +35,7 @@ import net.fabricmc.loader.api.ModContainer;
 @ApiStatus.Experimental
 public final class OEELSandbox {
 	public static final OEELSandbox INSTANCE = new OEELSandbox();
+	private static final Logger LOGGER = LogManager.getLogger(OEELSandbox.class);
 	protected final Sandbox sandbox = new SandboxImpl();
 
 	final Map<HashKey, Class<?>> loadedClasses = new HashMap<>();
@@ -37,13 +43,22 @@ public final class OEELSandbox {
 	final Set<HashKey> loading = new HashSet<>();
 
 	private OEELSandbox() {
+		Set<String> allExplicitAllowed = new HashSet<>();
 		for(ModContainer mod : FabricLoader.getInstance().getAllMods()) {
-			Path root = mod.getPath("sandboxed");
 			try {
+				Path root = mod.getPath("sandboxed");
 				this.populate(root);
+				for(String line : Files.readAllLines(mod.getPath("requires.txt"))) {
+					if(line.isBlank() || line.charAt(0) == '#') continue;
+					this.sandbox.allow(line);
+					if(allExplicitAllowed.add(line)) {
+						LOGGER.info("Whitelisting " + line);
+					}
+				}
 			} catch(IOException e) {
 				throw Validate.rethrow(e);
 			}
+
 		}
 	}
 
@@ -55,12 +70,14 @@ public final class OEELSandbox {
 			}
 			byte[] decryptedClass = OEELEncrypting.decrypt(entry.encryptionKey(), encryptedClass);
 
-			ByteBuffer buffer = ByteBuffer.wrap(decryptedClass);
-			int dependencies = buffer.getInt();
+			DataInputStream buffer = new DataInputStream(new ByteArrayInputStream(decryptedClass));
+			int dependencies = buffer.readInt();
 
 			try {
 				this.loading.add(k);
 				for(int i = 0; i < dependencies; i++) {
+					String internalName = buffer.readUTF();
+					this.sandbox.allow(internalName);
 					EncryptionEntry dep = new EncryptionEntry(buffer);
 					if(!this.loading.contains(dep.entryKey())) {
 						this.getFor(dep);
@@ -70,8 +87,8 @@ public final class OEELSandbox {
 				this.loading.remove(k);
 			}
 
-
-			return this.sandbox.defineValidatedClass(decryptedClass, buffer.arrayOffset(), buffer.remaining());
+			byte[] remaining = buffer.readAllBytes();
+			return this.sandbox.defineValidatedClass(remaining, 0, remaining.length);
 		}));
 	}
 
