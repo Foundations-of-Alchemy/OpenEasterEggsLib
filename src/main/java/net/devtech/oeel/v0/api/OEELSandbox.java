@@ -26,6 +26,7 @@ import org.jetbrains.annotations.ApiStatus;
 import oshi.util.tuples.Pair;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.MappingResolver;
 import net.fabricmc.loader.api.ModContainer;
 
 /**
@@ -44,15 +45,20 @@ public final class OEELSandbox {
 
 	private OEELSandbox() {
 		Set<String> allExplicitAllowed = new HashSet<>();
+		FabricLoader floader = FabricLoader.getInstance();
+		MappingResolver resolver = floader.getMappingResolver();
 		for(ModContainer mod : FabricLoader.getInstance().getAllMods()) {
 			try {
 				Path root = mod.getPath("sandboxed");
 				this.populate(root);
 				for(String line : Files.readAllLines(mod.getPath("requires.txt"))) {
 					if(line.isBlank() || line.charAt(0) == '#') continue;
-					this.sandbox.allow(line);
-					if(allExplicitAllowed.add(line)) {
-						LOGGER.info("Whitelisting " + line);
+
+					String mapped = resolver.mapClassName("intermediary", line.replace('/', '.'));
+					this.sandbox.allow(mapped.replace('.', '/'));
+
+					if(allExplicitAllowed.add(mapped)) {
+						LOGGER.debug("Whitelisting " + mapped);
 					}
 				}
 			} catch(IOException e) {
