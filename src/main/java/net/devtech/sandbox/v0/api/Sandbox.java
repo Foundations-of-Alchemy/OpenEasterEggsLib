@@ -9,5 +9,5 @@ public interface Sandbox {
 		this.allow(Type.getInternalName(cls));
 	}
 
-	Class<?> defineValidatedClass(String qualifiedName, byte[] buf, int off, int len);
+	Class<?> defineValidatedClass(byte[] buf, int off, int len);
 }

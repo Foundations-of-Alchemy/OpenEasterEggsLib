@@ -1,5 +1,6 @@
 package net.devtech.oeel.v0.api.util.hash;
 
+import java.io.DataInput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,6 +8,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.security.DigestException;
 import java.security.MessageDigest;
+import java.util.Random;
 
 import com.google.common.hash.HashCode;
 import io.github.astrarre.util.v0.api.Validate;
@@ -22,6 +24,10 @@ public final class HashKey extends FixedBuffer<HashKey> {
 		this.b = b;
 		this.c = c;
 		this.d = d;
+	}
+
+	public HashKey(Random random) {
+		this(random.nextLong(), random.nextLong(), random.nextLong(), random.nextLong());
 	}
 
 	public HashKey(CharSequence base16) {
@@ -75,6 +81,20 @@ public final class HashKey extends FixedBuffer<HashKey> {
 		this.b = SmallBuf.getLong(data, off + 8);
 		this.c = SmallBuf.getLong(data, off + 16);
 		this.d = SmallBuf.getLong(data, off + 24);
+	}
+
+	public HashKey(DataInput input) throws IOException {
+		this.a = input.readLong();
+		this.b = input.readLong();
+		this.c = input.readLong();
+		this.d = input.readLong();
+	}
+
+	public HashKey(ByteBuffer buffer) {
+		this.a = buffer.getLong();
+		this.b = buffer.getLong();
+		this.c = buffer.getLong();
+		this.d = buffer.getLong();
 	}
 
 	public void hash(Hasher hasher) {

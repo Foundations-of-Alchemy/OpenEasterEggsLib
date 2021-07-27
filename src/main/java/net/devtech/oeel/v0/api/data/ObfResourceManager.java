@@ -1,11 +1,15 @@
 package net.devtech.oeel.v0.api.data;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -16,8 +20,6 @@ import net.devtech.oeel.v0.api.access.ByteDeserializer;
 import net.devtech.oeel.v0.api.util.IdentifierPacker;
 import net.devtech.oeel.v0.api.util.OEELEncrypting;
 import net.devtech.oeel.v0.api.util.func.Iter;
-import net.devtech.oeel.v0.api.util.func.UFunc;
-import net.devtech.oeel.v0.api.util.func.UPred;
 import net.devtech.oeel.v0.api.util.hash.HashKey;
 
 import net.minecraft.resource.ResourceManager;
@@ -58,16 +60,32 @@ public class ObfResourceManager extends SinglePreparationResourceReloader<Multim
 
 	public <T> Iterable<T> decryptOnce(HashKey validationKey, byte[] key, ByteDeserializer<T> deserializer) {
 		long magic = IdentifierPacker.pack(deserializer.magic());
-		return () -> this.encryptedData.get(validationKey).stream().map(b -> OEELEncrypting.decryptStream(key, b)) // decrypt
-				             .filter(UPred.of(s -> {
-					             long b = s.readLong();
-					             return b == magic; // validate magic
-				             }))
-				             .map(UFunc.of(i -> {
-					             T value = deserializer.newInstance();
-					             deserializer.read(value, i, validationKey);
-					             return value;
-				             })).iterator();
+		List<T> list = new ArrayList<>();
+		var iterator = this.encryptedData.get(validationKey).iterator();
+		while(iterator.hasNext()) {
+			byte[] data = iterator.next();
+			T value = extracted(new ByteArrayInputStream(data), validationKey, key, deserializer, magic);
+			if(value != null) {
+				iterator.remove();
+				list.add(value);
+			}
+		}
+		return list;
+	}
+
+	public static <T> T extracted(InputStream input, HashKey validationKey, byte[] key, ByteDeserializer<T> deserializer, long magic) {
+		try {
+			DataInputStream decrypted = OEELEncrypting.decryptStream(key, input);
+			if(decrypted.readLong() == magic) {
+				T value = deserializer.newInstance();
+				deserializer.read(value, decrypted, validationKey);
+				return value;
+			} else {
+				return null;
+			}
+		} catch(IOException e) {
+			throw Validate.rethrow(e);
+		}
 	}
 
 	public static Map<Identifier, InputStream> findResources(ResourceType type,

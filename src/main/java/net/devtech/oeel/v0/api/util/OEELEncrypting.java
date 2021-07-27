@@ -2,6 +2,7 @@ package net.devtech.oeel.v0.api.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 
@@ -55,9 +56,9 @@ public class OEELEncrypting {
 		}
 	}
 
-	public static DataInputStream decryptStream(byte[] key, byte[] data) {
+	public static DataInputStream decryptStream(byte[] key, InputStream data) {
 		try {
-			return new DataInputStream(OEELImpl.decryptStream(key, new ByteArrayInputStream(data)));
+			return new DataInputStream(OEELImpl.decryptStream(key, data));
 		} catch(GeneralSecurityException e) {
 			throw new RuntimeException(e);
 		}

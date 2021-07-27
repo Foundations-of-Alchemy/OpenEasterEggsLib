@@ -17,12 +17,13 @@ public class SandboxImpl extends ClassLoader implements Sandbox {
 	}
 
 	@Override
-	public Class<?> defineValidatedClass(String qualifiedName, byte[] buf, int off, int len) {
+	public Class<?> defineValidatedClass(byte[] buf, int off, int len) {
 		ClassWriter writer = new ClassWriter(0);
 		ClassVisitor visitor = new SandboxingClassVisitor(writer, this.allowed);
 		ClassReader reader = new ClassReader(buf, off, len);
 		reader.accept(visitor, 0);
 		byte[] code = writer.toByteArray();
+		String qualifiedName = reader.getClassName().replace('/', '.');
 		return this.defineClass(qualifiedName, code, 0, code.length);
 	}
 }

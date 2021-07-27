@@ -24,7 +24,6 @@ import java.util.function.Consumer;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.impl.OEELImpl;
@@ -190,10 +189,19 @@ public class SpriteAtlasBuilder {
 		stitcher.getStitchedSprites((info, atlasWidth, atlasHeight, x, y) -> {
 			try {
 				ESprt sprt = map.get(info);
-				try(SpriteEncrypter encrypter = new SpriteEncrypter(sprt.entry.entryKey(), dataOutput.apply(sprt.entry))) {
+				try(AbstractEncrypter<?> encrypter = new AbstractEncrypter(sprt.entry.entryKey(), dataOutput.apply(sprt.entry))) {
 					encrypter.startEncryptedData(sprt.entry.encryptionKey());
 					encrypter.writeMagic("oeel:tex");
-					encrypter.write(sprt.image, x, y, sprt.meta);
+					encrypter.writeInt(x);
+					encrypter.writeInt(y);
+					encrypter.writeInt(sprt.image.getWidth());
+					encrypter.writeInt(sprt.image.getHeight());
+					if(sprt.meta == null) {
+						encrypter.writeUTF("");
+					} else {
+						encrypter.writeUTF(sprt.meta.toString());
+					}
+					ImageIO.write(sprt.image, "png", encrypter);
 				}
 			} catch(IOException e) {
 				throw Validate.rethrow(e);

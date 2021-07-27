@@ -8,5 +8,5 @@ pluginManagement {
     }
 }
 
-rootProject.name = "OpenEasterEggsLib"
+rootProject.name = "oeel"
 include("Datagen")

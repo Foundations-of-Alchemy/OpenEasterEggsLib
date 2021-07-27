@@ -48,8 +48,10 @@ public final class OEEL implements ModInitializer {
 			manager.registerReloader(new HashFunctionManager<>("ihshr", HashFunctionManager.ITEM_COMP));
 			manager.registerReloader(new HashFunctionManager<>("bhshr", HashFunctionManager.BLOCK_COMP));
 			manager.registerReloader(new HashFunctionManager<>("ehshr", HashFunctionManager.ENTITY_COMP));
+
 			ObfResourceManager resourceManager = new ObfResourceManager();
 			RECIPES.accept(resourceManager);
+
 			manager.registerReloader(resourceManager);
 		});
 	}
