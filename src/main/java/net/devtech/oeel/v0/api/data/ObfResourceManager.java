@@ -1,6 +1,7 @@
 package net.devtech.oeel.v0.api.data;
 
 import java.io.ByteArrayInputStream;
+import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.google.common.collect.HashMultimap;
@@ -60,6 +62,7 @@ public class ObfResourceManager extends SinglePreparationResourceReloader<Multim
 
 	public <T> Iterable<T> decryptOnce(HashKey validationKey, byte[] key, ByteDeserializer<T> deserializer) {
 		long magic = IdentifierPacker.pack(deserializer.magic());
+		Validate.isTrue(magic != -1, "magic cannot be packed");
 		List<T> list = new ArrayList<>();
 		var iterator = this.encryptedData.get(validationKey).iterator();
 		while(iterator.hasNext()) {
@@ -68,6 +71,23 @@ public class ObfResourceManager extends SinglePreparationResourceReloader<Multim
 			if(value != null) {
 				iterator.remove();
 				list.add(value);
+			}
+		}
+		return list;
+	}
+
+	public <T> Iterable<T> decryptOnce(HashKey validationKey, byte[] encryptionKey, String magic, Function<DataInputStream, T> deserializer)
+			throws IOException {
+		long magicLong = IdentifierPacker.pack(magic);
+		Validate.isTrue(magicLong != -1, "magic cannot be packed");
+		List<T> list = new ArrayList<>();
+		var iterator = this.encryptedData.get(validationKey).iterator();
+		while(iterator.hasNext()) {
+			byte[] data = iterator.next();
+			DataInputStream stream = OEELEncrypting.decryptStream(encryptionKey, new ByteArrayInputStream(data));
+			if(stream.readLong() == magicLong) {
+				iterator.remove();
+				list.add(deserializer.apply(stream));
 			}
 		}
 		return list;

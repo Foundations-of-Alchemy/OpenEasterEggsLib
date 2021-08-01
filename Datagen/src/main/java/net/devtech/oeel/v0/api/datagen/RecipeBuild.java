@@ -30,7 +30,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 public class RecipeBuild {
-	private static final Identifier STANDARD = OEELImpl.id("standard");
+	private static final Identifier STANDARD = OEELImpl.id("default");
 
 	public final HashFuncComp<ItemKey, Item> hashManager;
 	public final BiHasher hasher = BiHasher.createDefault(true);

@@ -24,7 +24,7 @@ public abstract class FixedBuffer<Self extends FixedBuffer<Self>> implements Com
 	}
 
 	public String toString64() {
-		return Base64.getUrlEncoder().encodeToString(this.toByteArray());
+		return Base64.getMimeEncoder().encodeToString(this.toByteArray());
 	}
 
 	public void write(OutputStream stream) throws IOException {
