@@ -1,5 +1,6 @@
 package net.devtech.oeel.v0.api.data;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +16,8 @@ import net.devtech.oeel.v0.api.access.JavaHashFunc;
 import net.devtech.oeel.v0.api.util.OEELEncrypting;
 import net.devtech.oeel.v0.api.util.Reg;
 import net.devtech.oeel.v0.api.util.hash.Hasher;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.minecraft.tag.ServerTagManagerHolder;
 import net.minecraft.tag.Tag;
@@ -24,6 +27,7 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 
 public class HashFuncComp<T, E> {
+	private static final Logger LOGGER = LogManager.getLogger(HashFuncComp.class);
 	private final Map<Identifier, HashFunction<T>> map = new HashMap<>();
 	private final RegistryKey<Registry<E>> registry;
 	private final Function<T, E> getter;
@@ -92,22 +96,32 @@ public class HashFuncComp<T, E> {
 		return item.apply(value);
 	}
 
+	static class Ex extends Exception {
+		Ex(String message) {
+			super(message);
+		}
+	}
+
 	protected HashFunction<T> tag(String key, JsonElement value) {
 		TagManager manager = ServerTagManagerHolder.getTagManager();
-		Tag<E> tag = manager.getTag(this.registry, new Identifier(key), null);
-		String val = value.getAsString();
-		byte[] replacement = OEELEncrypting.decodeBase16(val, 0, val.length());
-		return (i, k) -> {
-			if(tag.contains(this.getter.apply(k))) {
-				i.putBytes(replacement);
-			}
-		};
+		try {
+			Tag<E> tag = manager.getTag(this.registry, new Identifier(key), identifier -> new Ex(identifier.toString()));
+			String val = value.getAsString();
+			byte[] replacement = val.getBytes(StandardCharsets.UTF_8);
+			return (i, k) -> {
+				if(tag.contains(this.getter.apply(k))) {
+					i.putBytes(replacement);
+				}
+			};
+		} catch(Ex ex) {
+			return (i, k) -> {};
+		}
 	}
 
 	protected HashFunction<T> registry(String key, JsonElement value) {
 		E item = (E) Registry.REGISTRIES.getOrThrow((RegistryKey) this.registry).get(new Identifier(key));
 		String val = value.getAsString();
-		byte[] replacement = OEELEncrypting.decodeBase16(val, 0, val.length());
+		byte[] replacement = val.getBytes(StandardCharsets.UTF_8);
 		return (i, k) -> {
 			if(this.getter.apply(k) == item) {
 				i.putBytes(replacement);
@@ -118,7 +132,7 @@ public class HashFuncComp<T, E> {
 	protected HashFunction<T> hasher(String key, JsonElement value) {
 		E item = (E) Registry.REGISTRIES.getOrThrow((RegistryKey) this.registry).get(new Identifier(key));
 		String val = value.getAsString();
-		byte[] replacement = OEELEncrypting.decodeBase16(val, 0, val.length());
+		byte[] replacement = val.getBytes(StandardCharsets.UTF_8);
 		return (i, k) -> {
 			if(this.getter.apply(k) == item) {
 				i.putBytes(replacement);

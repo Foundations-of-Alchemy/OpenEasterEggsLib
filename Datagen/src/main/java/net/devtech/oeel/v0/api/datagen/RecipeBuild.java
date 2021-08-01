@@ -58,6 +58,11 @@ public class RecipeBuild {
 		return this;
 	}
 
+	public RecipeBuild addItemExact(Item item) {
+		this.stacks.add(new ItemStack(item));
+		return this;
+	}
+
 	public RecipeBuild setHash(Identifier hashConfigId) {
 		this.itemHasher = this.hashManager.forId(hashConfigId);
 		return this;
