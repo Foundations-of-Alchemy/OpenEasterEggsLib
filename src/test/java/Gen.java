@@ -15,6 +15,7 @@ import com.google.common.collect.Multimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import net.devtech.oeel.v0.api.util.hash.SHA256Hasher;
 
@@ -82,6 +83,7 @@ public class Gen {
 		JsonObject json = new JsonObject();
 		JsonObject functions = new JsonObject();
 		json.add("functions", functions);
+		functions.add("&oeel:default", JsonNull.INSTANCE);
 
 		Multimap<String, TagData> minecrafts = HashMultimap.create();
 		for(Tag item : arr) {
