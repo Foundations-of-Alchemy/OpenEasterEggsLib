@@ -22,7 +22,7 @@ import net.devtech.oeel.v0.api.util.hash.SHA256Hasher;
 public class Gen {
 	public static void main(String[] args) throws IOException {
 		Tags tags;
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
 		try(Reader reader = new InputStreamReader(Gen.class.getResourceAsStream("/tags.json"))) {
 			tags = gson.fromJson(reader, Tags.class);
 		}
