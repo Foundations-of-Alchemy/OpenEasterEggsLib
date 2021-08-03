@@ -110,9 +110,9 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 			hasher.putInt(width);
 			hasher.putInt(height);
 
-			for(int x = 0; x < width; x++) {
-				for(int y = 0; y < height; y++) {
-					ItemStack stack = inventory.getStack((offX + x) + (offY + y) * matrixWidth);
+			for(int y = 0; y < height; y++) {
+				for(int x = 0; x < width; x++) {
+					ItemStack stack = inventory.getStack((offY + y) * matrixWidth + (offX + x));
 					hashFunction.hashOrThrow(hasher, ItemKey.of(stack));
 				}
 			}

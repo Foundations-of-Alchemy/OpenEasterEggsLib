@@ -153,15 +153,10 @@ public class SpriteAtlasBuilder {
 			JsonObject currentAtlasMeta = from(spriteAtlasPath);
 
 			Path obfDataDir = modDataDirectory.resolve("obf_rss");
-			AtomicInteger uniqueId = new AtomicInteger();
 			List<Path> paths = new ArrayList<>();
 			JsonObject replacement = this.buildSprites(e -> {
-				SHA256Hasher hasher = SHA256Hasher.getPooled();
-				hasher.putIdentifier(atlasId);
-				hasher.putString(spriteGroupName, StandardCharsets.UTF_8);
-				hasher.putInt(uniqueId.incrementAndGet());
-				String str = hasher.hashC().toString();
-				Path unique = obfDataDir.resolve(str.substring(0, 16) + ".data");
+				String str = e.entryKey().toString().substring(0, 16);
+				Path unique = obfDataDir.resolve(str + ".data");
 				paths.add(unique);
 				Files.createDirectories(unique.getParent());
 				return Files.newOutputStream(unique);
@@ -189,7 +184,7 @@ public class SpriteAtlasBuilder {
 		stitcher.getStitchedSprites((info, atlasWidth, atlasHeight, x, y) -> {
 			try {
 				ESprt sprt = map.get(info);
-				try(AbstractEncrypter<?> encrypter = new AbstractEncrypter(sprt.entry.entryKey(), dataOutput.apply(sprt.entry))) {
+				try(AbstractEncrypter<?> encrypter = new AbstractEncrypter<>(sprt.entry.entryKey(), dataOutput.apply(sprt.entry))) {
 					encrypter.startEncryptedData(sprt.entry.encryptionKey());
 					encrypter.writeMagic("oeel:tex");
 					encrypter.writeInt(x);

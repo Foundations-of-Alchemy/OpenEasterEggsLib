@@ -194,7 +194,7 @@ public abstract class AbstractHasher implements Hasher {
 	@Override
 	public Hasher putItemStackIgnoreCount(ItemStack stack) {
 		this.putRegistry(stack.getItem(), Registry.ITEM);
-		this.putNbt(stack.getTag());
+		this.putNbt(stack.getNbt());
 		return this;
 	}
 

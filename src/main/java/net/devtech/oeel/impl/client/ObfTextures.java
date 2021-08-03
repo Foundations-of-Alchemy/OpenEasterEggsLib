@@ -33,6 +33,7 @@ public class ObfTextures {
 	public static List<Key> getMetas(ResourceManager manager) {
 		List<Key> newMetas = new ArrayList<>();
 
+		// todo wait why does this need to be in the data dir, this is an easy way of enforcing the need for an assets directory
 		ObfResourceManager.findResources(ResourceType.SERVER_DATA, manager, "obf_atlas", s -> s.endsWith(".json")).forEach((identifier, stream) -> {
 			try(Reader reader = new InputStreamReader(stream)) {
 				Map<String, AtlasMeta> meta = OEELImpl.GSON.fromJson(reader, ATLAS_TYPE);

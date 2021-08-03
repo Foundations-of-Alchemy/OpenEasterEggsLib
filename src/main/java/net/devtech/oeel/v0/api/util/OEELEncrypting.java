@@ -16,16 +16,17 @@ public class OEELEncrypting {
 	 * from https://stackoverflow.com/a/20980505/9773993
 	 */
 	public static byte[] decodeBase16(CharSequence cs, int off, int end) {
-		if((end & 1) != 0) {
+		int len = end - off;
+		if((len & 1) != 0) {
 			throw new IllegalArgumentException("cs must have an even length");
 		}
-		byte[] array = new byte[end >> 1];
-		for(int p = 0; p < end; p += 2) {
-			int hi = Character.digit(cs.charAt(p + off), 16), lo = Character.digit(cs.charAt(p + 1), 16);
+		byte[] array = new byte[len >> 1];
+		for(int p = off; p < end; p += 2) {
+			int hi = Character.digit(cs.charAt(p), 16), lo = Character.digit(cs.charAt(p + 1), 16);
 			if((hi | lo) < 0) {
-				throw new IllegalArgumentException(cs + " contains non-hex characters");
+				throw new IllegalArgumentException(cs.subSequence(off, end) + " contains non-hex characters");
 			}
-			array[p >> 1] = (byte) (hi << 4 | lo);
+			array[(p - off) >> 1] = (byte) (hi << 4 | lo);
 		}
 		return array;
 	}

@@ -10,6 +10,8 @@ subprojects {
     apply plugin: 'java-library'
 }
 
+
+
 sourceSets {
     testmod {
         compileClasspath += main.compileClasspath
@@ -48,8 +50,13 @@ allprojects {
         mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
         modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
         modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-        modImplementation 'io.github.astrarre:astrarre-access-v0-fabric:1.6.3'
-        //modImplementation 'RebornCore:RebornCore-1.17:5.0.2-beta+build.43'
+        modApi 'io.github.astrarre:astrarre-access-v0-fabric:1.6.3'
+        modImplementation 'TechReborn:TechReborn-1.17:5.0.5-beta+build.85'
+        modImplementation 'RebornCore:RebornCore-1.17:5.0.5-beta+build.85'
+    }
+
+    loom {
+        accessWidenerPath = new File(rootDir, "src/main/resources/oeel.aw")
     }
 
     processResources {

@@ -15,5 +15,6 @@
   },
   "mixins": [
     "oeel.mixins.json"
-  ]
+  ],
+  "accessWidener": "oeel.aw"
 }

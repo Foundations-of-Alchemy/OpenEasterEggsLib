@@ -1,4 +1,4 @@
-package yeet.client;
+package client;
 
 import java.util.function.Function;
 
@@ -32,4 +32,5 @@ public class CubeModel extends AbstractBakedModel {
 		}
 		return true;
 	}
+
 }

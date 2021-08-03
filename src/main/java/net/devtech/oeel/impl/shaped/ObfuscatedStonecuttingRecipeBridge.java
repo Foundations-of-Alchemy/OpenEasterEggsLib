@@ -33,7 +33,7 @@ public class ObfuscatedStonecuttingRecipeBridge extends StonecuttingRecipe {
 		Map<Enchantment, Integer> enchantments = new HashMap<>();
 		enchantments.put(Enchantments.UNBREAKING, 1);
 		EnchantmentHelper.set(enchantments, stack);
-		stack.getOrCreateTag().putInt("HideFlags", 1);
+		stack.getOrCreateNbt().putInt("HideFlags", 1);
 		ICON = stack;
 	}
 

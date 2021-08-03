@@ -10,7 +10,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import io.github.astrarre.itemview.v0.fabric.ItemKey;
-import io.github.astrarre.util.v0.api.Id;
 import net.devtech.oeel.impl.OEELImpl;
 import net.devtech.oeel.impl.shaped.ObfuscatedCraftingRecipeBridge;
 import net.devtech.oeel.impl.shaped.ObfuscatedSmithingRecipeBridge;
@@ -53,12 +52,12 @@ public class RecipeBuild {
 
 	// initialization
 
-	public RecipeBuild addStack(ItemStack stack) {
+	public RecipeBuild stack(ItemStack stack) {
 		this.stacks.add(stack);
 		return this;
 	}
 
-	public RecipeBuild addItemExact(Item item) {
+	public RecipeBuild item(Item item) {
 		this.stacks.add(new ItemStack(item));
 		return this;
 	}
@@ -149,10 +148,14 @@ public class RecipeBuild {
 		return this.write(this.get(), stream, output);
 	}
 
+	public RecipeBuild empty() {
+		return this.stack(ItemStack.EMPTY);
+	}
+
 	protected HashKey write(EncryptionEntry entry, OutputStream stream, byte[] output) throws IOException {
 		try(AbstractEncrypter<?> encrypter = new AbstractEncrypter<>(entry.entryKey(), stream)) {
 			encrypter.startEncryptedData(entry.encryptionKey());
-			encrypter.writeMagic("oeel:obf_r");
+			encrypter.writeMagic("oeel:obfr");
 			encrypter.writeUTF(this.hashConfigId.toString());
 			encrypter.writeUTF("");
 			encrypter.writeUTF("");

@@ -1,4 +1,4 @@
-package yeet.client;
+package client;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -14,7 +14,6 @@ import java.util.function.Supplier;
 import com.mojang.datafixers.util.Pair;
 import io.github.astrarre.util.v0.api.Lazy;
 import org.jetbrains.annotations.Nullable;
-import yeet.A;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.BakedModel;
@@ -40,21 +39,25 @@ import net.fabricmc.fabric.api.renderer.v1.material.MaterialFinder;
 import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
 import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
-import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 
 public abstract class AbstractBakedModel implements UnbakedModel {
+	public static final List<Direction> DIRECTIONS = List.of(Direction.values());
 	public static final Lazy<Renderer> RENDERER = Lazy.of(RendererAccess.INSTANCE::getRenderer);
-	public static final Lazy<RenderMaterial> EMISSIVE = RENDERER.map(Renderer::materialFinder).map(m -> m.emissive(0, true))
+	public static final Lazy<RenderMaterial> EMISSIVE = RENDERER.map(Renderer::materialFinder)
+			                                                    .map(m -> m.emissive(0, true))
 			                                                    .map(MaterialFinder::find);
-	public static final Lazy<RenderMaterial> EMISSIVE_LAYER = RENDERER.map(Renderer::materialFinder).map(m -> m.emissive(0, true))
-			                                                          .map(r -> r.blendMode(0, BlendMode.TRANSLUCENT)).map(MaterialFinder::find);
-	public static final Lazy<RenderMaterial> TRANSPARENT = RENDERER.map(Renderer::materialFinder).map(r -> r.blendMode(0, BlendMode.TRANSLUCENT))
+	public static final Lazy<RenderMaterial> EMISSIVE_LAYER = RENDERER.map(Renderer::materialFinder)
+			                                                          .map(m -> m.emissive(0, true))
+			                                                          .map(r -> r.blendMode(0, BlendMode.TRANSLUCENT))
+			                                                          .map(MaterialFinder::find);
+	public static final Lazy<RenderMaterial> TRANSPARENT = RENDERER.map(Renderer::materialFinder)
+			                                                       .map(r -> r.blendMode(0, BlendMode.TRANSLUCENT))
 			                                                       .map(MaterialFinder::find);
-	protected final Map<SpriteIdentifier, Sprite> resolved = new ConcurrentHashMap<>(); // todo clear
 	private static final Identifier DEFAULT_BLOCK_MODEL = new Identifier("minecraft:block/block");
+	protected final Map<SpriteIdentifier, Sprite> resolved = new ConcurrentHashMap<>(); // todo clear
 	protected final Set<SpriteIdentifier> textureDependencies = new HashSet<>();
 	protected final SpriteIdentifier particles;
 	private ModelTransformation itemTransformation;
@@ -64,42 +67,21 @@ public abstract class AbstractBakedModel implements UnbakedModel {
 		this.textureDependencies.add(particles);
 	}
 
-	public void buildCube(ModelBakeSettings rotations, QuadEmitter emitter, Function<SpriteIdentifier, Sprite> textureGetter, CubeData data) {
-		for (Direction direction : A.DIRECTIONS) {
-			Direction transformed = Direction.transform(rotations.getRotation().getMatrix(), direction);
-			boolean isLayer = false;
-			for (CubeData.FaceData identifier : data.identifiers.get(direction)) {
-				emitter.square(transformed, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f);
-				emitter.spriteBake(0, resolved.computeIfAbsent(identifier.identifier, textureGetter), MutableQuadView.BAKE_LOCK_UV);
-				emitter.spriteColor(0, -1, -1, -1, -1);
-				if (identifier.isEmissive) {
-					if (isLayer) {
-						emitter.material(EMISSIVE_LAYER.get());
-					} else {
-						emitter.material(EMISSIVE.get());
-					}
-				} else if (isLayer) {
-					emitter.material(TRANSPARENT.get());
-				}
-				emitter.emit();
-				isLayer = true;
-			}
-		}
-	}
-
 	public void emitBlockQuads(Mesh mesh,
 			BlockRenderView blockView,
 			BlockState state,
 			BlockPos pos,
 			Supplier<Random> randomSupplier,
 			RenderContext context) {
-		if(mesh != null)
-		context.meshConsumer().accept(mesh);
+		if(mesh != null) {
+			context.meshConsumer().accept(mesh);
+		}
 	}
 
 	public void emitItemQuads(Mesh mesh, ItemStack stack, Supplier<Random> randomSupplier, RenderContext context) {
-		if(mesh != null)
-		context.meshConsumer().accept(mesh);
+		if(mesh != null) {
+			context.meshConsumer().accept(mesh);
+		}
 	}
 
 	public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction face, Random random) {
@@ -141,10 +123,6 @@ public abstract class AbstractBakedModel implements UnbakedModel {
 		return Collections.emptyList();
 	}
 
-	protected Identifier getItemTransformationParentId() {
-		return DEFAULT_BLOCK_MODEL;
-	}
-
 	@Nullable
 	@Override
 	public BakedModel bake(ModelLoader loader,
@@ -161,6 +139,10 @@ public abstract class AbstractBakedModel implements UnbakedModel {
 		} else {
 			return new Meshless();
 		}
+	}
+
+	protected Identifier getItemTransformationParentId() {
+		return DEFAULT_BLOCK_MODEL;
 	}
 
 	protected abstract boolean build(Renderer renderer,
@@ -216,7 +198,7 @@ public abstract class AbstractBakedModel implements UnbakedModel {
 		}
 
 		@Override
-		public Sprite getSprite() {
+		public Sprite getParticleSprite() {
 			return AbstractBakedModel.this.getParticleSprite();
 		}
 

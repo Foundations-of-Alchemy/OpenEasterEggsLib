@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -44,6 +44,8 @@ abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture {
 	int mipmapLevel;
 
 	@Shadow @Final private List<TextureTickListener> animatedSprites;
+	@Shadow @Final private Identifier id;
+	@Shadow @Final private Map<Identifier, Sprite> sprites;
 
 	@Inject(method = "stitch",
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/texture/TextureStitcher;stitch()V"),
@@ -56,7 +58,7 @@ abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture {
 			Set<Identifier> set,
 			int i,
 			TextureStitcher stitcher,
-			int mimapLevel) throws IOException {
+			int mimapLevel) {
 		this.mipmapLevel = mipmapLevel;
 		this.oeel_encryptedSpriteData.clear();
 		for(ObfTextures.Key meta : ObfTextures.getMetas(manager)) {
@@ -72,8 +74,8 @@ abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture {
 	@SuppressWarnings("UnresolvedMixinReference")
 	@Inject(method = "method_24105",
 			at = @At(value = "INVOKE",
-					target = "Ljava/util/concurrent/CompletableFuture;runAsync(Ljava/lang/Runnable;Ljava/util/concurrent/Executor;)" + "Ljava/util" +
-					         "/concurrent/CompletableFuture;"),
+					target =
+							"Ljava/util/concurrent/CompletableFuture;runAsync(Ljava/lang/Runnable;Ljava/util/concurrent/Executor;)" + "Ljava/util" + "/concurrent/CompletableFuture;"),
 			cancellable = true)
 	public void stitch(int i,
 			Queue queue,
@@ -93,9 +95,11 @@ abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture {
 		}
 	}
 
-
-	@Redirect(method = "getSprite", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;"))
-	public Object getObfSprite(Map map, Object key, Identifier spriteId) {
+	@ModifyVariable(method = "getSprite", at = @At(value = "STORE"))
+	public Sprite postAssign(Sprite sprite, Identifier spriteId) {
+		if(sprite != null) {
+			return sprite;
+		}
 		outer:
 		try {
 			String path = spriteId.getPath();
@@ -106,24 +110,22 @@ abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture {
 			HashId id = HashId.getKey(spriteId);
 			if(id == null) break outer;
 			if(space == null) break outer;
-			Sprite sprite = this.oeel_unencryptSprite(spriteId, id.validation, id.encryption, space);
-			map.put(spriteId, sprite);
-			return sprite;
+			Sprite unencryptSprite = this.oeel_unencryptSprite(spriteId, id.validation, id.encryption, space);
+			this.sprites.put(spriteId, unencryptSprite);
+			return unencryptSprite;
 		} catch(GeneralSecurityException | IOException e) {
 			e.printStackTrace();
 			throw Validate.rethrow(e);
 		}
-
-		return map.get(key);
+		return null;
 	}
 
 	@Shadow
 	@Nullable
 	protected abstract Sprite loadSprite(ResourceManager container, Sprite.Info info, int atlasWidth, int atlasHeight, int maxLevel, int x, int y);
 
-	@Shadow @Final private Identifier id;
-
-	private Sprite oeel_unencryptSprite(Identifier id, HashKey validationKey, byte[] encryptionKey, ObfTextures.TotalAtlasSpace space) throws GeneralSecurityException, IOException {
+	private Sprite oeel_unencryptSprite(Identifier id, HashKey validationKey, byte[] encryptionKey, ObfTextures.TotalAtlasSpace space)
+			throws GeneralSecurityException, IOException {
 		var decrypt = ObfResourceManager.client.decryptOnce(validationKey, encryptionKey, ObfTextures.DESERIALIZER);
 		var only = Iterables.getOnlyElement(decrypt);
 		ResourceManagerHack hack = new ResourceManagerHack(only.data);

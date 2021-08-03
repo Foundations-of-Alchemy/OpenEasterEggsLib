@@ -36,10 +36,10 @@ public final class HashKey extends FixedBuffer<HashKey> {
 
 	public HashKey(CharSequence base16, int off) {
 		int index = off;
-		this.a = Long.parseLong(base16, index, index += 16, 16);
-		this.b = Long.parseLong(base16, index, index += 16, 16);
-		this.c = Long.parseLong(base16, index, index += 16, 16);
-		this.d = Long.parseLong(base16, index, index + 16, 16);
+		this.a = (((long) Character.digit(base16.charAt(index), 16)) << 60) | Long.parseLong(base16, index+1, index += 16, 16);
+		this.b = (((long) Character.digit(base16.charAt(index), 16)) << 60) | Long.parseLong(base16, index+1, index += 16, 16);
+		this.c = (((long) Character.digit(base16.charAt(index), 16)) << 60) | Long.parseLong(base16, index+1, index += 16, 16);
+		this.d = (((long) Character.digit(base16.charAt(index), 16)) << 60) | Long.parseLong(base16, index+1, index + 16, 16);
 	}
 
 	public HashKey(MessageDigest digest) {
@@ -95,6 +95,10 @@ public final class HashKey extends FixedBuffer<HashKey> {
 		this.b = buffer.getLong();
 		this.c = buffer.getLong();
 		this.d = buffer.getLong();
+	}
+
+	public HashKey(byte[] chars) {
+		this(chars, 0);
 	}
 
 	public void hash(Hasher hasher) {

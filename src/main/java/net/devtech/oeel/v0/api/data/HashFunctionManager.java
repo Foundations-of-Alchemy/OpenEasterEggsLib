@@ -17,7 +17,6 @@ import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
-@SuppressWarnings("unchecked")
 public class HashFunctionManager<T, E> extends MultiJsonDataLoader<JsonElement> {
 	public static final HashFuncComp<ItemKey, Item> ITEM_COMP = new HashFuncComp<>(Registry.ITEM_KEY, ItemKey::getItem, OEEL.ITEM_HASHER);
 	public static final HashFuncComp<Entity, EntityType<?>> ENTITY_COMP = new HashFuncComp<>(Registry.ENTITY_TYPE_KEY, Entity::getType, OEEL.ENTITY_HASHER);

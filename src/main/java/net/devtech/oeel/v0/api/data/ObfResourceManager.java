@@ -23,6 +23,8 @@ import net.devtech.oeel.v0.api.util.IdentifierPacker;
 import net.devtech.oeel.v0.api.util.OEELEncrypting;
 import net.devtech.oeel.v0.api.util.func.Iter;
 import net.devtech.oeel.v0.api.util.hash.HashKey;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourcePack;
@@ -36,6 +38,7 @@ import net.fabricmc.api.Environment;
 
 public class ObfResourceManager extends SinglePreparationResourceReloader<Multimap<HashKey, byte[]>> {
 	@Environment(EnvType.CLIENT) public static ObfResourceManager client;
+	private static final Logger LOGGER = LogManager.getLogger(ObfResourceManager.class);
 
 	private Multimap<HashKey, byte[]> encryptedData;
 
@@ -144,5 +147,6 @@ public class ObfResourceManager extends SinglePreparationResourceReloader<Multim
 	@Override
 	protected void apply(Multimap<HashKey, byte[]> prepared, ResourceManager manager, Profiler profiler) {
 		this.encryptedData = prepared;
+		LOGGER.warn("Found " + prepared.size() + " encrypted resources");
 	}
 }

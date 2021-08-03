@@ -21,7 +21,7 @@ import net.minecraft.util.Identifier;
  * A base obfuscated recipe
  */
 public class BaseObfuscatedRecipe {
-	public static final ByteDeserializer<BaseObfuscatedRecipe> SERIALIZER = new Deserializer<>(BaseObfuscatedRecipe::new, "oeel:obf_r");
+	public static final ByteDeserializer<BaseObfuscatedRecipe> SERIALIZER = new Deserializer<>(BaseObfuscatedRecipe::new, "oeel:obfr");
 	protected HashFunction<ItemKey> item;
 	protected HashFunction<Entity> entity;
 	protected HashFunction<BlockData> block;

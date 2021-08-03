@@ -1,10 +1,9 @@
-package yeet.client;
+package client;
 
 import java.util.Collection;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import yeet.A;
 
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
@@ -12,7 +11,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 
 public class CubeData {
-	public final Multimap<Direction, FaceData> identifiers = ArrayListMultimap.create(A.DIRECTIONS.size(), 1);
+	public final Multimap<Direction, FaceData> identifiers = ArrayListMultimap.create(6, 1);
 
 	public CubeData() {
 	}

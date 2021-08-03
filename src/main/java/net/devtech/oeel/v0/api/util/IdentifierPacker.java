@@ -56,7 +56,7 @@ public final class IdentifierPacker {
 		CHAR_MASK = (1 << BITS_PER_CHAR) - 1;
 		STR_LEN_BITS_SIZE = Long.SIZE % BITS_PER_CHAR;
 		STR_LEN_MASK = (1 << STR_LEN_BITS_SIZE) - 1;
-		MAX_SIZE = Math.min(Long.SIZE / BITS_PER_CHAR, 1 << STR_LEN_BITS_SIZE);
+		MAX_SIZE = Math.min(Long.SIZE / BITS_PER_CHAR, 1 << STR_LEN_BITS_SIZE) - 1;
 	}
 
 	static char load(char c, int id, byte[] toId, byte[] toChar, CharSet validChars, char max) {
@@ -75,7 +75,7 @@ public final class IdentifierPacker {
 	 */
 	public static long pack(String str) {
 		int len = str.length();
-		if(len >= MAX_SIZE) {
+		if(len > MAX_SIZE) {
 			return -1;
 		}
 
