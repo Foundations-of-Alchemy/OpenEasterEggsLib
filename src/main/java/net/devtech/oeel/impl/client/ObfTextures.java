@@ -13,7 +13,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.JsonObject;
 import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.impl.OEELImpl;
-import net.devtech.oeel.v0.api.access.ByteDeserializer;
+import net.devtech.oeel.v0.api.access.OEELDeserializer;
 import net.devtech.oeel.v0.api.data.ObfResourceManager;
 import net.devtech.oeel.v0.api.util.hash.HashKey;
 
@@ -27,7 +27,6 @@ import net.minecraft.util.Identifier;
  * <validation_key><encryption_key>]
  */
 public class ObfTextures {
-	public static final SpriteDataDeserializer DESERIALIZER = new SpriteDataDeserializer();
 	static final Type ATLAS_TYPE = new TypeToken<Map<String, AtlasMeta>>() {}.getType();
 
 	public static List<Key> getMetas(ResourceManager manager) {
@@ -62,29 +61,18 @@ public class ObfTextures {
 		public int height;
 		public JsonObject meta;
 		public byte[] data;
+
+		public SpriteMeta(DataInputStream buffer, HashKey key) throws IOException {
+			this.offX = buffer.readInt();
+			this.offY = buffer.readInt();
+			this.width = buffer.readInt();
+			this.height = buffer.readInt();
+			this.meta = OEELImpl.GSON.fromJson(buffer.readUTF(), JsonObject.class);
+			this.data = buffer.readAllBytes();
+		}
+
 	}
 
 	public record TotalAtlasSpace(Sprite.Info info, int atlasWidth, int atlasHeight, int x, int y, int maxLevel) {}
 
-	public static class SpriteDataDeserializer implements ByteDeserializer<SpriteMeta> {
-		@Override
-		public String magic() {
-			return "oeel:tex";
-		}
-
-		@Override
-		public SpriteMeta newInstance() {
-			return new SpriteMeta();
-		}
-
-		@Override
-		public void read(SpriteMeta instance, DataInputStream buffer, HashKey inputHash) throws IOException {
-			instance.offX = buffer.readInt();
-			instance.offY = buffer.readInt();
-			instance.width = buffer.readInt();
-			instance.height = buffer.readInt();
-			instance.meta = OEELImpl.GSON.fromJson(buffer.readUTF(), JsonObject.class);
-			instance.data = buffer.readAllBytes();
-		}
-	}
 }

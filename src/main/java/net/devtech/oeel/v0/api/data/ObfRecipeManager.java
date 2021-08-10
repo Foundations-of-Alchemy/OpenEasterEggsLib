@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import net.devtech.oeel.v0.api.access.ByteDeserializer;
+import net.devtech.oeel.v0.api.access.OEELDeserializer;
 import net.devtech.oeel.v0.api.recipes.BaseObfuscatedRecipe;
 import net.devtech.oeel.v0.api.util.hash.HashKey;
 import org.jetbrains.annotations.Nullable;
@@ -15,10 +15,10 @@ import net.minecraft.util.Identifier;
 
 public class ObfRecipeManager<T extends BaseObfuscatedRecipe> implements RecipeManager<T>, Consumer<ObfResourceManager> {
 	protected final Map<HashKey, List<T>> recipeCache = new HashMap<>();
-	protected final ByteDeserializer<T> deserializer;
+	protected final OEELDeserializer<T> deserializer;
 	protected ObfResourceManager current;
 
-	public ObfRecipeManager(ByteDeserializer<T> deserializer) {
+	public ObfRecipeManager(OEELDeserializer<T> deserializer) {
 		this.deserializer = deserializer;
 	}
 

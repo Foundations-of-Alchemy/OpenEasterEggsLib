@@ -28,6 +28,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+// todo validate hash functions everywhere
 public class RecipeBuild {
 	private static final Identifier STANDARD = OEELImpl.id("default");
 
@@ -45,8 +49,9 @@ public class RecipeBuild {
 		}
 	}
 
+	@Environment(EnvType.CLIENT)
 	public RecipeBuild() {
-		this(HashFunctionManager.ITEM_COMP);
+		this(HashFunctionManager.CLIENT.itemComp);
 		this.itemHasher = Hasher::putItemKey;
 	}
 

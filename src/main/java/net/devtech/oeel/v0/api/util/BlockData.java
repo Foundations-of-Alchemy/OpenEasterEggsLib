@@ -4,6 +4,7 @@ import io.github.astrarre.util.v0.api.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
@@ -67,6 +68,10 @@ public class BlockData {
 			}
 		}
 		return state;
+	}
+
+	public Block getBlock() {
+		return this.getState().getBlock();
 	}
 
 	public WorldChunk getChunk() {

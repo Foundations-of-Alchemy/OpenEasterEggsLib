@@ -46,7 +46,7 @@ public class ObfuscatedCraftingRecipeBridge extends SpecialCraftingRecipe {
 	 */
 	public static ItemStack craft(boolean testingForEmpty, Function<HashFunction<ItemKey>, EncryptionEntry> hash)
 			throws GeneralSecurityException, IOException {
-		for(Map.Entry<Identifier, HashFunction<ItemKey>> entry : HashFunctionManager.ITEM_COMP.entrySet()) {
+		for(Map.Entry<Identifier, HashFunction<ItemKey>> entry : HashFunctionManager.SERVER.itemComp.entrySet()) {
 			HashFunction<ItemKey> function = entry.getValue();
 			EncryptionEntry test = hash.apply(function);
 			BaseObfuscatedRecipe recipe = OEEL.RECIPES.getForInput(test.entryKey(), test.encryptionKey(), entry.getKey(), null, null);

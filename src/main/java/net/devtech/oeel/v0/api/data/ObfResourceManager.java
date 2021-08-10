@@ -5,21 +5,20 @@ import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.GeneralSecurityException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import io.github.astrarre.util.v0.api.Validate;
-import net.devtech.oeel.v0.api.access.ByteDeserializer;
-import net.devtech.oeel.v0.api.util.IdentifierPacker;
+import net.devtech.oeel.v0.api.access.OEELDeserializer;
+import net.devtech.oeel.v0.api.util.EncryptionEntry;
 import net.devtech.oeel.v0.api.util.OEELEncrypting;
 import net.devtech.oeel.v0.api.util.func.Iter;
 import net.devtech.oeel.v0.api.util.hash.HashKey;
@@ -37,78 +36,24 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 public class ObfResourceManager extends SinglePreparationResourceReloader<Multimap<HashKey, byte[]>> {
-	@Environment(EnvType.CLIENT) public static ObfResourceManager client;
 	private static final Logger LOGGER = LogManager.getLogger(ObfResourceManager.class);
-
+	@Environment(EnvType.CLIENT) public static ObfResourceManager client;
 	private Multimap<HashKey, byte[]> encryptedData;
 
 	public ObfResourceManager() {
 	}
 
-	/**
-	 * Does not cache the output, removes the data in the storage if found
-	 */
-	public byte[] decryptOnce(HashKey validationKey, byte[] decryption, Predicate<byte[]> dataPredicate) throws GeneralSecurityException {
-		Collection<byte[]> data = this.encryptedData.get(validationKey);
-		if(!data.isEmpty()) {
-			Iterator<byte[]> iterator = data.iterator();
-			while(iterator.hasNext()) {
-				byte[] datum = iterator.next();
-				if(dataPredicate.test(datum)) {
-					iterator.remove();
-					return OEELEncrypting.decrypt(decryption, datum);
-				}
-			}
-		}
-		return null;
+	public <T> Iterable<T> decryptOnce(EncryptionEntry entry, OEELDeserializer<T> deserializer) {
+		return this.decryptOnce(entry.entryKey(), entry.encryptionKey(), deserializer);
 	}
 
-	public <T> Iterable<T> decryptOnce(HashKey validationKey, byte[] key, ByteDeserializer<T> deserializer) {
-		long magic = IdentifierPacker.pack(deserializer.magic());
-		Validate.isTrue(magic != -1, "magic cannot be packed");
+	public <T> Iterable<T> decryptOnce(HashKey validationKey, byte[] key, OEELDeserializer<T> deserializer) {
 		List<T> list = new ArrayList<>();
 		var iterator = this.encryptedData.get(validationKey).iterator();
 		while(iterator.hasNext()) {
-			byte[] data = iterator.next();
-			T value = extracted(new ByteArrayInputStream(data), validationKey, key, deserializer, magic);
-			if(value != null) {
-				iterator.remove();
-				list.add(value);
-			}
+			this.extracted(validationKey, key, deserializer, list, iterator);
 		}
 		return list;
-	}
-
-	public <T> Iterable<T> decryptOnce(HashKey validationKey, byte[] encryptionKey, String magic, Function<DataInputStream, T> deserializer)
-			throws IOException {
-		long magicLong = IdentifierPacker.pack(magic);
-		Validate.isTrue(magicLong != -1, "magic cannot be packed");
-		List<T> list = new ArrayList<>();
-		var iterator = this.encryptedData.get(validationKey).iterator();
-		while(iterator.hasNext()) {
-			byte[] data = iterator.next();
-			DataInputStream stream = OEELEncrypting.decryptStream(encryptionKey, new ByteArrayInputStream(data));
-			if(stream.readLong() == magicLong) {
-				iterator.remove();
-				list.add(deserializer.apply(stream));
-			}
-		}
-		return list;
-	}
-
-	public static <T> T extracted(InputStream input, HashKey validationKey, byte[] key, ByteDeserializer<T> deserializer, long magic) {
-		try {
-			DataInputStream decrypted = OEELEncrypting.decryptStream(key, input);
-			if(decrypted.readLong() == magic) {
-				T value = deserializer.newInstance();
-				deserializer.read(value, decrypted, validationKey);
-				return value;
-			} else {
-				return null;
-			}
-		} catch(IOException e) {
-			throw Validate.rethrow(e);
-		}
 	}
 
 	public static Map<Identifier, InputStream> findResources(ResourceType type,
@@ -128,6 +73,20 @@ public class ObfResourceManager extends SinglePreparationResourceReloader<Multim
 			}
 		}
 		return map;
+	}
+
+	private <T> void extracted(HashKey validationKey, byte[] key, OEELDeserializer<T> deserializer, List<T> list, Iterator<byte[]> iterator) {
+		try {
+			byte[] data = iterator.next();
+			DataInputStream decrypted = OEELEncrypting.decryptStream(key, new ByteArrayInputStream(data));
+			T result = deserializer.read(decrypted, validationKey);
+			if(result != null) {
+				iterator.remove();
+				list.add(result);
+			}
+		} catch(IOException e) {
+			throw Validate.rethrow(e);
+		}
 	}
 
 	@Override

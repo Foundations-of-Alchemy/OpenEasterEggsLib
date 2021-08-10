@@ -1,9 +1,8 @@
-package client;
+package yeet.client;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import net.devtech.oeel.impl.OEELImpl;
 import org.jetbrains.annotations.Nullable;
 import yeet.A;
 

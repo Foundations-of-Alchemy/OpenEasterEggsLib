@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 import net.devtech.oeel.v0.api.util.EncryptionEntry;
 
 public class BiHasher extends AbstractHasher implements Closeable {
-	private static final byte[] MAGIC = ByteBuffer.allocate(8).putLong(0xDEAD_BEEF_CAFE_BABEL).array();
+	private static final byte[] MAGIC = ByteBuffer.allocate(8).putInt(0xDEAD_BEEF).putInt(0xCAFE_BABE).array();
 	public final SHA256Hasher hasherA, hasherB;
 
 	public BiHasher(SHA256Hasher hasherA, SHA256Hasher hasherB) {
@@ -91,5 +91,4 @@ public class BiHasher extends AbstractHasher implements Closeable {
 	public HashKey hashA() {
 		return this.hasherA.hashC();
 	}
-
 }

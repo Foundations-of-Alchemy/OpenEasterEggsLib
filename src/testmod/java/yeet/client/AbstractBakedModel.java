@@ -1,4 +1,4 @@
-package client;
+package yeet.client;
 
 import java.util.Collection;
 import java.util.Collections;

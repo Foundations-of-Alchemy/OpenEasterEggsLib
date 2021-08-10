@@ -3,14 +3,13 @@ package yeet;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import client.AbstractBakedModel;
 import io.github.astrarre.util.v0.api.Validate;
 import net.devtech.oeel.v0.api.ItemModelFactory;
 import net.devtech.oeel.v0.api.util.EncryptionEntry;
 import net.devtech.oeel.v0.api.util.HashId;
 import net.devtech.oeel.v0.api.util.hash.HashKey;
-import client.OEELModelProvider;
+import yeet.client.AbstractBakedModel;
+import yeet.client.OEELModelProvider;
 
 import net.minecraft.client.render.model.ModelBakeSettings;
 import net.minecraft.client.render.model.ModelLoader;

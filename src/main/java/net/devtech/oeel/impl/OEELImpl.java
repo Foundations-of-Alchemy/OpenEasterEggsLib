@@ -1,10 +1,13 @@
 package net.devtech.oeel.impl;
 
+import java.io.DataInput;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.Key;
+import java.util.Objects;
 import java.util.function.Function;
 
 import javax.crypto.Cipher;
@@ -43,6 +46,10 @@ public class OEELImpl {
 
 	public static Id id2(String path) {
 		return Id.create(MODID, path);
+	}
+
+	public static boolean validate(DataInput buffer, Identifier id) throws IOException {
+		return Objects.equals(buffer.readUTF(), id.getNamespace()) && Objects.equals(buffer.readUTF(), id.getPath());
 	}
 
 	public static byte[] crypt(byte[] keyBytes, byte[] inputBytes, int mode) throws GeneralSecurityException {

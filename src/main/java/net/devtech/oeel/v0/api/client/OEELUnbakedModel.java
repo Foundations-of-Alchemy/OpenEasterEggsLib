@@ -14,10 +14,14 @@ import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.ModelBakeSettings;
 import net.minecraft.client.render.model.ModelLoader;
 import net.minecraft.client.render.model.UnbakedModel;
+import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.util.Identifier;
 
+/**
+ * non-obfuscated texture dependencies must be declared because otherwise they wont be added to the atlas
+ */
 public class OEELUnbakedModel implements UnbakedModel {
 	final Collection<SpriteIdentifier> textureDependencies;
 	Collection<SpriteIdentifier> resolvedTextureDependencies;

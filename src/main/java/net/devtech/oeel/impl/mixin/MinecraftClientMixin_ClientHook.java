@@ -1,6 +1,8 @@
 package net.devtech.oeel.impl.mixin;
 
+import net.devtech.oeel.v0.api.data.HashFunctionManager;
 import net.devtech.oeel.v0.api.data.ObfResourceManager;
+import net.devtech.oeel.v0.api.event.ClientResourceManagerLoadEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,11 +18,8 @@ import net.minecraft.resource.ResourceManager;
 abstract class MinecraftClientMixin_ClientHook {
 	@Shadow public abstract ResourceManager getResourceManager();
 
-	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/resource/ResourcePackManager;scanPacks()V"))
+	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/debug/DebugRenderer;<init>(Lnet/minecraft/client/MinecraftClient;)V"))
 	public void atEnd(RunArgs args, CallbackInfo ci) {
-		ReloadableResourceManager manager = (ReloadableResourceManager) this.getResourceManager();
-		ObfResourceManager resourceManager = new ObfResourceManager();
-		manager.registerReloader(resourceManager);
-		ObfResourceManager.client = resourceManager;
+		ClientResourceManagerLoadEvent.POST_ALL.get().onLoad((MinecraftClient) (Object) this, (ReloadableResourceManager) this.getResourceManager());
 	}
 }

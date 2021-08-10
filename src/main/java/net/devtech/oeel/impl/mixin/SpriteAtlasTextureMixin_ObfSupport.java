@@ -126,7 +126,7 @@ abstract class SpriteAtlasTextureMixin_ObfSupport extends AbstractTexture {
 
 	private Sprite oeel_unencryptSprite(Identifier id, HashKey validationKey, byte[] encryptionKey, ObfTextures.TotalAtlasSpace space)
 			throws GeneralSecurityException, IOException {
-		var decrypt = ObfResourceManager.client.decryptOnce(validationKey, encryptionKey, ObfTextures.DESERIALIZER);
+		var decrypt = ObfResourceManager.client.decryptOnce(validationKey, encryptionKey, ObfTextures.SpriteMeta::new);
 		var only = Iterables.getOnlyElement(decrypt);
 		ResourceManagerHack hack = new ResourceManagerHack(only.data);
 		this.bindTexture();
