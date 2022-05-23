@@ -20,6 +20,3 @@ Comes with a data-gen library. I would recommend making a datagen sourceset and 
 **Can't you just brute force all the recipes?**: No, NBT is infinitely variable. But even without NBT, there are around 1,000^9 combinations in the crafting table for *just shaped recipes with **only** vanilla items*. So, good luck. If you're still confident, there will be a tech demo / challenge soon.
 
 **Why?**: It's in the name, for easter eggs, but more importantly it's part of [foa](https://gist.github.com/Devan-Kerman/4e7a5e6a44e08281d8bfef8e56dab61f).
-
-**This was NOT made for paranoid artists/developers**\
-If you're using this mod for DRM, the licence allows you to but, fuck you.
